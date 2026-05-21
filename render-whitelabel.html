@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 Whitelabel Render — Fortics AI 4.0</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --app-bg: #f1f3f8;
+    --panel-bg: #f8f9fc;
+    --topbar-h: 52px;
+    --sidebar-w: 400px;
+
+    /* MOCK CSS VARS — LM defaults */
+    --mock-primary: #0066ff;
+    --mock-primary-content: #eef2fc;
+    --mock-secondary: #94aee3;
+    --mock-secondary-content: #283249;
+    --mock-accent: #5a7fd6;
+    --mock-accent-content: #16202e;
+    --mock-neutral: #737373;
+    --mock-neutral-content: #ffffff;
+    --mock-base-100: #ffffff;
+    --mock-base-200: #f4f5f9;
+    --mock-base-300: #d5d9e8;
+    --mock-base-content: #4c4c4c;
+    --mock-success: #16a34a;
+    --mock-error: #dc2626;
+    --mock-warning: #d97706;
+    --mock-info: #0ea5e9;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--app-bg);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===================== APP TOPBAR ===================== */
+  .app-topbar {
+    height: 48px;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #334155;
+  }
+  .app-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .app-topbar-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.3px;
+  }
+  .app-version-badge {
+    background: #3b82f6;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .app-topbar-right {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-export {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-export:hover { background: #2563eb; }
+  .btn-import {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #475569;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-import:hover { color: #f1f5f9; border-color: #94a3b8; }
+
+  /* ===================== MAIN LAYOUT ===================== */
+  .app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ===================== LEFT PANEL ===================== */
+  .left-panel {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--panel-bg);
+    border-right: 1px solid #e2e6f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .left-panel-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    padding-bottom: 0;
+  }
+  .left-panel-scroll::-webkit-scrollbar { width: 4px; }
+  .left-panel-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+  .panel-section {
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e6f0;
+  }
+
+  /* Form fields */
+  .field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+  }
+  .field-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e6f0;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field-input:focus { border-color: #3b82f6; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    display: flex;
+    background: #e2e6f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .theme-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+    color: #64748b;
+  }
+  .theme-btn.active {
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+
+  /* Logo uploads */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .logo-upload-area {
+    border: 1.5px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+    background: #fff;
+    position: relative;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .logo-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+  .logo-upload-area.dragover { border-color: #3b82f6; background: #dbeafe; }
+  .logo-upload-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 2px;
+  }
+  .logo-upload-hint {
+    font-size: 9px;
+    color: #94a3b8;
+  }
+  .logo-preview {
+    display: none;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .logo-preview img {
+    width: 60px;
+    height: 28px;
+    object-fit: contain;
+  }
+  .logo-remove {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .logo-upload-area.has-logo .logo-preview { display: flex; }
+  .logo-upload-area.has-logo .logo-placeholder { display: none; }
+  .logo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+
+  /* Color rows */
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: background .15s;
+    user-select: none;
+  }
+  .collapsible-header:hover { background: #f1f5f9; }
+  .collapsible-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+  }
+  .collapsible-arrow {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform .2s;
+  }
+  .collapsible-header.open .collapsible-arrow { transform: rotate(180deg); }
+  .collapsible-body { display: none; }
+  .collapsible-body.open { display: block; }
+
+  .subsection-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 8px 0 6px;
+    padding-left: 2px;
+  }
+
+  .color-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 6px;
+    padding: 6px 6px 5px;
+    border-radius: 6px;
+    transition: background .1s;
+  }
+  .color-row:hover { background: #f8fafc; }
+  .color-row-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .color-row-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .color-row-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .color-row-var {
+    font-size: 9px;
+    color: #94a3b8;
+    font-family: monospace;
+    margin-top: 1px;
+  }
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #e2e6f0;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .color-hex {
+    width: 76px;
+    flex-shrink: 0;
+    padding: 4px 6px;
+    border: 1px solid #e2e6f0;
+    border-radius: 5px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #334155;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .color-hex:focus { border-color: #3b82f6; }
+  .color-row-bottom {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-left: 2px;
+  }
+  .oklch-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    width: 34px;
+  }
+  .color-oklch {
+    flex: 1;
+    padding: 3px 6px;
+    border: 1px solid #e2e6f0;
+    border-radius: 5px;
+    font-size: 10px;
+    font-family: monospace;
+    color: #334155;
+    outline: none;
+    transition: border-color .15s;
+    background: #fafbfd;
+  }
+  .color-oklch:focus { border-color: #7c3aed; background: #fff; }
+  .color-oklch.has-value { border-color: #7c3aed; background: #f5f3ff; color: #5b21b6; }
+
+  /* Panel footer */
+  .left-panel-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #e2e6f0;
+    background: var(--panel-bg);
+    flex-shrink: 0;
+  }
+  .btn-reset {
+    width: 100%;
+    padding: 8px;
+    border: 1.5px solid #e2e6f0;
+    border-radius: 7px;
+    background: #fff;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-reset:hover { border-color: #94a3b8; color: #1e293b; }
+
+  /* ===================== RIGHT PANEL ===================== */
+  .right-panel {
+    flex: 1;
+    background: #e5e7eb;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+  .zoom-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #d1d5db;
+    border-bottom: 1px solid #b8bcc6;
+    flex-shrink: 0;
+  }
+  .zoom-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    min-width: 38px;
+    text-align: center;
+  }
+  .zoom-btn {
+    width: 26px;
+    height: 26px;
+    border: 1px solid #94a3b8;
+    border-radius: 5px;
+    background: #fff;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s;
+    line-height: 1;
+  }
+  .zoom-btn:hover { background: #f1f5f9; }
+  .zoom-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 110px;
+    height: 4px;
+    border-radius: 2px;
+    background: #94a3b8;
+    outline: none;
+    cursor: pointer;
+  }
+  .zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .zoom-reset {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid #94a3b8;
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .zoom-reset:hover { color: #1e293b; border-color: #475569; }
+  .right-panel-scroll {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* ===================== MOCK CONTAINER ===================== */
+  .mock-wrapper {
+    transform: scale(var(--mock-zoom, 0.85));
+    transform-origin: top center;
+    width: 1280px;
+    flex-shrink: 0;
+  }
+
+  .mock-shell {
+    width: 1280px;
+    height: 800px;
+    background: var(--mock-base-100);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.1);
+    display: flex;
+    flex-direction: row;
+  }
+
+  .mock-right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* MOCK TOPBAR */
+  .mock-topbar {
+    height: 52px;
+    background: var(--mock-primary);
+    border-bottom: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .mock-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .mock-hamburger {
+    color: var(--mock-primary-content);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    transition: background .15s;
+    opacity: 0.85;
+  }
+  .mock-hamburger:hover { background: rgba(255,255,255,.15); }
+  .mock-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mock-logo-img {
+    height: 32px;
+    max-width: 140px;
+    object-fit: contain;
+    display: none;
+    filter: brightness(0) invert(1);
+  }
+  .mock-logo-fallback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mock-logo-star {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--mock-primary-content);
+    line-height: 1;
+  }
+  .mock-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .mock-logo-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--mock-primary-content);
+    letter-spacing: -0.5px;
+  }
+  .mock-logo-sub {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--mock-primary-content);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .mock-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .mock-nav-item {
+    font-size: 13px;
+    color: var(--mock-primary-content);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 2px;
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: opacity .15s;
+    opacity: 0.88;
+  }
+  .mock-nav-item:hover { opacity: 1; }
+  .mock-nav-icon { display: flex; align-items: center; }
+  .mock-moon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--mock-primary-content);
+    padding: 4px;
+    border-radius: 6px;
+    transition: background .15s;
+    opacity: 0.88;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mock-moon-btn svg { width: 17px; height: 17px; display: block; }
+  .mock-moon-btn:hover { background: rgba(255,255,255,.15); opacity: 1; }
+  .mock-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.22);
+    color: var(--mock-primary-content);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1.5px solid rgba(255,255,255,.4);
+  }
+
+  /* MOCK BODY */
+  .mock-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* MOCK SIDEBAR */
+  .mock-sidebar {
+    width: 256px;
+    flex-shrink: 0;
+    background: var(--mock-base-200);
+    border-right: 1px solid var(--mock-base-300);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width .25s ease;
+  }
+  .mock-sidebar::-webkit-scrollbar { display: none; }
+  .mock-sidebar-logo {
+    width: 100%;
+    height: 85px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--mock-base-300);
+    overflow: hidden;
+    transition: padding .25s ease;
+  }
+  .mock-sidebar-logo .mock-logo-img {
+    max-width: 180px;
+    max-height: 52px;
+    object-fit: contain;
+    filter: none;
+  }
+  .mock-sidebar-logo .mock-logo-fallback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mock-sidebar-logo .mock-logo-star {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--mock-primary);
+    line-height: 1;
+  }
+  .mock-sidebar-logo .mock-logo-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--mock-primary);
+    letter-spacing: -0.5px;
+  }
+  .mock-sidebar-logo .mock-logo-sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--mock-neutral);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .mock-menu {
+    padding: 10px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .mock-menu-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity .2s ease, max-width .25s ease;
+    opacity: 1;
+    max-width: 200px;
+  }
+  .mock-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mock-base-content);
+    transition: all .15s;
+    position: relative;
+  }
+  .mock-menu-item:hover {
+    background: rgba(0,0,0,0.04);
+  }
+  .mock-menu-item.active {
+    color: var(--mock-primary);
+    background: color-mix(in srgb, var(--mock-primary) 12%, transparent);
+    font-weight: 600;
+  }
+  .mock-menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: var(--mock-primary);
+    border-radius: 0 3px 3px 0;
+  }
+  .mock-menu-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .mock-menu-icon i, .mock-menu-icon svg { width: 16px; height: 16px; display: block; }
+  .mock-nav-icon i, .mock-nav-icon svg { width: 15px; height: 15px; display: block; }
+  /* SIDEBAR COLLAPSED */
+  .mock-sidebar.collapsed { width: 60px; }
+  .mock-sidebar.collapsed .mock-sidebar-logo { padding: 0; }
+  .mock-sidebar.collapsed .mock-logo-text { display: none; }
+  .mock-sidebar.collapsed .mock-logo-img { max-width: 36px; max-height: 36px; }
+  .mock-sidebar.collapsed .mock-sidebar-logo .mock-logo-star { font-size: 28px; }
+  .mock-sidebar.collapsed .mock-menu-label { opacity: 0; max-width: 0; pointer-events: none; }
+  .mock-sidebar.collapsed .mock-menu-item { padding: 9px; justify-content: center; gap: 0; }
+  .mock-sidebar.collapsed .mock-menu-item.active::before { display: none; }
+  .mock-sidebar.collapsed .mock-menu {
+    padding: 10px 6px;
+    align-items: center;
+  }
+  .mock-sidebar.collapsed .mock-menu-item {
+    width: 40px;
+    border-radius: 8px;
+  }
+  /* Tooltip on hover when collapsed */
+  .mock-sidebar.collapsed .mock-menu-item {
+    position: relative;
+  }
+  .mock-sidebar.collapsed .mock-menu-item::after {
+    content: attr(data-label);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1e293b;
+    color: #f1f5f9;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s ease;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+  .mock-sidebar.collapsed .mock-menu-item:hover::after { opacity: 1; }
+  .mock-menu-separator {
+    height: 1px;
+    background: var(--mock-base-300);
+    margin: 6px 8px;
+  }
+  .mock-menu-spacer { flex: 1; }
+
+  /* MOCK CONTENT */
+  .mock-content {
+    flex: 1;
+    background: var(--mock-base-100);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .mock-content::-webkit-scrollbar { width: 5px; }
+  .mock-content::-webkit-scrollbar-thumb { background: var(--mock-base-300); border-radius: 3px; }
+
+  .mock-content-inner {
+    padding: 22px 24px 0;
+  }
+
+  /* Breadcrumb */
+  .mock-breadcrumb {
+    font-size: 12px;
+    color: var(--mock-neutral);
+    margin-bottom: 4px;
+  }
+  .mock-breadcrumb span { color: var(--mock-base-content); opacity: 0.5; }
+
+  /* Dashboard header */
+  .mock-dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .mock-dash-title-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mock-dash-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--mock-base-content);
+    line-height: 1.2;
+  }
+  .mock-dash-subtitle {
+    font-size: 12px;
+    color: var(--mock-neutral);
+    margin-top: 2px;
+  }
+  .mock-breadcrumb-right {
+    font-size: 12px;
+    color: var(--mock-neutral);
+  }
+
+  /* Tabs */
+  .mock-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--mock-base-300);
+    margin-bottom: 18px;
+  }
+  .mock-tab {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mock-neutral);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .mock-tab.active {
+    color: var(--mock-primary);
+    border-bottom-color: var(--mock-primary);
+    font-weight: 600;
+  }
+  .mock-tab:hover:not(.active) { color: var(--mock-base-content); }
+
+  /* Stats grid */
+  .mock-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .mock-card {
+    background: var(--mock-base-100);
+    border: 1px solid var(--mock-base-300);
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    position: relative;
+  }
+  .mock-card-icon {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 18px;
+    color: var(--mock-neutral);
+    opacity: 0.45;
+  }
+  .mock-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mock-primary);
+    margin-bottom: 8px;
+  }
+  .mock-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--mock-base-content);
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .mock-card-legend {
+    font-size: 11px;
+    color: var(--mock-neutral);
+  }
+  .mock-stars { color: var(--mock-base-300); font-size: 18px; }
+  .mock-star-filled { color: #f59e0b; }
+  .mock-like-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .mock-like-val { font-size: 24px; font-weight: 700; }
+  .mock-like-val.like { color: #16a34a; }
+  .mock-like-val.dislike { color: #dc2626; }
+
+  /* Bottom panels */
+  .mock-panels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .mock-panel {
+    background: var(--mock-base-100);
+    border: 1px solid var(--mock-base-300);
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .mock-panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mock-primary);
+    margin-bottom: 4px;
+  }
+  .mock-panel-sub {
+    font-size: 11px;
+    color: var(--mock-neutral);
+    margin-bottom: 12px;
+  }
+
+  /* Word cloud */
+  .mock-wordcloud {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+  }
+  .mock-word {
+    position: absolute;
+    font-weight: 700;
+    line-height: 1;
+    transition: color .3s;
+  }
+
+  /* Pie chart */
+  .mock-pie-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .mock-pie-canvas-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+  .mock-pie-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mock-base-content);
+  }
+  .mock-pie-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    justify-content: center;
+  }
+  .mock-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--mock-base-content);
+  }
+  .mock-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MOCK FOOTER */
+  .mock-footer {
+    height: 32px;
+    background: var(--mock-base-200);
+    border-top: 1px solid var(--mock-base-300);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .mock-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--mock-neutral);
+  }
+  .mock-ver-badge {
+    background: #f59e0b;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 99px;
+  }
+  .mock-footer-right {
+    font-size: 10px;
+    color: var(--mock-neutral);
+  }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 560px;
+    max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 14px;
+  }
+  .modal-textarea {
+    width: 100%;
+    height: 360px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #1e293b;
+    border: 1px solid #e2e6f0;
+    border-radius: 8px;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    background: #f8fafc;
+  }
+  .modal-textarea:focus { border-color: #3b82f6; }
+  .modal-error {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    justify-content: flex-end;
+  }
+  .btn-modal-copy, .btn-modal-apply {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-modal-copy:hover, .btn-modal-apply:hover { background: #2563eb; }
+  .btn-modal-close {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #e2e6f0;
+    padding: 8px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-modal-close:hover { border-color: #94a3b8; color: #1e293b; }
+</style>
+</head>
+<body>
+
+<!-- APP TOPBAR -->
+<div class="app-topbar">
+  <div class="app-topbar-left">
+    <span class="app-topbar-title">🎨 Whitelabel Color Tester</span>
+    <span class="app-version-badge">Fortics AI 4.0</span>
+  </div>
+  <div class="app-topbar-right">
+    <button class="btn-export" onclick="openExportModal()">Exportar JSON</button>
+    <button class="btn-import" onclick="openImportModal()">Importar JSON</button>
+  </div>
+</div>
+
+<div class="app-body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-panel-scroll">
+
+      <!-- IDENTIDADE -->
+      <div class="panel-section">
+        <div class="section-title">Identidade</div>
+        <div class="field-row">
+          <label class="field-label">Nome do Produto</label>
+          <input class="field-input" id="inp-product-name" type="text" value="Fortics IA" oninput="updateProductName(this.value)">
+        </div>
+        <div class="field-row">
+          <label class="field-label">Versão</label>
+          <input class="field-input" id="inp-version" type="text" value="4.0.1" oninput="updateVersion(this.value)">
+        </div>
+      </div>
+
+      <!-- LOGOS -->
+      <div class="panel-section">
+        <div class="section-title">Logos</div>
+        <div class="logo-grid">
+          <div id="logo-lm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-lg','lm-lg')" ondrop="handleLogoDrop(event,'logo-lm-lg','lm-lg')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+            <div class="logo-placeholder">
+              <span style="font-size:20px;opacity:.4">🖼</span>
+              <div class="logo-upload-label">Logo Light (grande)</div>
+              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
+            </div>
+            <div class="logo-preview">
+              <img id="logo-lm-lg-thumb" src="" alt="logo">
+              <button class="logo-remove" onclick="removeLogo(event,'logo-lm-lg','lm-lg')">×</button>
+            </div>
+          </div>
+          <div id="logo-dm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-lg','dm-lg')" ondrop="handleLogoDrop(event,'logo-dm-lg','dm-lg')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+            <div class="logo-placeholder">
+              <span style="font-size:20px;opacity:.4">🖼</span>
+              <div class="logo-upload-label">Logo Dark (grande)</div>
+              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
+            </div>
+            <div class="logo-preview">
+              <img id="logo-dm-lg-thumb" src="" alt="logo">
+              <button class="logo-remove" onclick="removeLogo(event,'logo-dm-lg','dm-lg')">×</button>
+            </div>
+          </div>
+          <div id="logo-lm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-sm','lm-sm')" ondrop="handleLogoDrop(event,'logo-lm-sm','lm-sm')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+            <div class="logo-placeholder">
+              <span style="font-size:20px;opacity:.4">🖼</span>
+              <div class="logo-upload-label">Logo Light (pequena)</div>
+              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
+            </div>
+            <div class="logo-preview">
+              <img id="logo-lm-sm-thumb" src="" alt="logo">
+              <button class="logo-remove" onclick="removeLogo(event,'logo-lm-sm','lm-sm')">×</button>
+            </div>
+          </div>
+          <div id="logo-dm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-sm','dm-sm')" ondrop="handleLogoDrop(event,'logo-dm-sm','dm-sm')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+            <div class="logo-placeholder">
+              <span style="font-size:20px;opacity:.4">🖼</span>
+              <div class="logo-upload-label">Logo Dark (pequena)</div>
+              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
+            </div>
+            <div class="logo-preview">
+              <img id="logo-dm-sm-thumb" src="" alt="logo">
+              <button class="logo-remove" onclick="removeLogo(event,'logo-dm-sm','dm-sm')">×</button>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="logo-file-input" accept=".svg,.png,image/svg+xml,image/png" style="display:none" onchange="handleLogoFile(this)">
+      </div>
+
+      <!-- TEMA -->
+      <div class="panel-section">
+        <div class="section-title">Tema</div>
+        <div class="theme-toggle">
+          <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ Light Mode</button>
+          <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 Dark Mode</button>
+        </div>
+      </div>
+
+      <!-- CORES LM -->
+      <div class="panel-section">
+        <div class="collapsible-header open" onclick="toggleCollapse(this)">
+          <span class="collapsible-title">🌤 Cores — Light Mode</span>
+          <span class="collapsible-arrow">▼</span>
+        </div>
+        <div class="collapsible-body open" id="lm-colors-body">
+
+          <div class="subsection-title">Cores Principais</div>
+          <div id="lm-main-colors"></div>
+
+          <div class="subsection-title">Backgrounds e Texto</div>
+          <div id="lm-bg-colors"></div>
+
+        </div>
+      </div>
+
+      <!-- CORES DM -->
+      <div class="panel-section">
+        <div class="collapsible-header" onclick="toggleCollapse(this)">
+          <span class="collapsible-title">🌙 Cores — Dark Mode</span>
+          <span class="collapsible-arrow">▼</span>
+        </div>
+        <div class="collapsible-body" id="dm-colors-body">
+
+          <div class="subsection-title">Cores Principais</div>
+          <div id="dm-main-colors"></div>
+
+          <div class="subsection-title">Backgrounds e Texto</div>
+          <div id="dm-bg-colors"></div>
+
+        </div>
+      </div>
+
+    </div><!-- end scroll -->
+
+    <div class="left-panel-footer">
+      <button class="btn-reset" onclick="resetDefaults()">↺ Resetar padrões</button>
+    </div>
+  </div><!-- end left panel -->
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="zoom-toolbar">
+      <button class="zoom-btn" onclick="setZoom(-0.05)">&#8722;</button>
+      <input class="zoom-slider" id="zoom-slider" type="range" min="0.4" max="1.2" step="0.05" value="0.85" oninput="setZoomFromSlider(this.value)">
+      <button class="zoom-btn" onclick="setZoom(0.05)">&#43;</button>
+      <span class="zoom-label" id="zoom-label">85%</span>
+      <button class="zoom-reset" onclick="setZoomValue(0.85)">Reset</button>
+    </div>
+    <div class="right-panel-scroll">
+    <div class="mock-wrapper" id="mock-wrapper">
+      <div class="mock-shell">
+
+        <!-- SIDEBAR (full height) -->
+        <div class="mock-sidebar">
+          <div class="mock-sidebar-logo">
+            <img class="mock-logo-img" id="mock-logo-img" src="" alt="Logo">
+            <div class="mock-logo-fallback" id="mock-logo-fallback">
+              <span class="mock-logo-star">✱</span>
+              <div class="mock-logo-text">
+                <span class="mock-logo-name" id="mock-logo-name">Fortics</span>
+                <span class="mock-logo-sub" id="mock-logo-sub">IA</span>
+              </div>
+            </div>
+          </div>
+          <div class="mock-menu">
+            <button class="mock-menu-item active" data-label="Dashboard" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="layout-dashboard"></i></span><span class="mock-menu-label"> Dashboard</span></button>
+            <button class="mock-menu-item" data-label="Meus conteúdos" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="file-text"></i></span><span class="mock-menu-label"> Meus conteúdos</span></button>
+            <button class="mock-menu-item" data-label="Conhecimentos" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="brain"></i></span><span class="mock-menu-label"> Conhecimentos</span></button>
+            <button class="mock-menu-item" data-label="Agentes" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="bot"></i></span><span class="mock-menu-label"> Agentes</span></button>
+            <button class="mock-menu-item" data-label="Workflows" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="git-fork"></i></span><span class="mock-menu-label"> Workflows</span></button>
+            <button class="mock-menu-item" data-label="Insights" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="lightbulb"></i></span><span class="mock-menu-label"> Insights</span></button>
+            <button class="mock-menu-item" data-label="Integrações" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="plug"></i></span><span class="mock-menu-label"> Integrações</span></button>
+            <button class="mock-menu-item" data-label="Database" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="database"></i></span><span class="mock-menu-label"> Database</span></button>
+            <button class="mock-menu-item" data-label="Relatórios" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="bar-chart-2"></i></span><span class="mock-menu-label"> Relatórios</span></button>
+            <button class="mock-menu-item" data-label="Documentação" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="book-open"></i></span><span class="mock-menu-label"> Documentação</span></button>
+            <button class="mock-menu-item" data-label="Configurações" onclick="setMenuActive(this)"><span class="mock-menu-icon"><i data-lucide="settings"></i></span><span class="mock-menu-label"> Configurações</span></button>
+            <!-- <div class="mock-menu-spacer"></div>
+            <div class="mock-menu-separator"></div> -->
+          </div>
+        </div>
+
+        <div class="mock-right-col">
+
+        <!-- TOPBAR -->
+        <div class="mock-topbar">
+          <div class="mock-topbar-left">
+            <button class="mock-hamburger" onclick="toggleSidebar()">≡</button>
+          </div>
+          <div class="mock-topbar-right">
+            <div class="mock-nav-item"><span class="mock-nav-icon"><i data-lucide="message-square"></i></span> Monitoramento</div>
+            <div class="mock-nav-item"><span class="mock-nav-icon"><i data-lucide="flask-conical"></i></span> Playground</div>
+            <button class="mock-moon-btn" onclick="toggleMockTheme()"><i data-lucide="moon"></i></button>
+            <div class="mock-nav-item">Administrator</div>
+            <div class="mock-avatar">AD</div>
+          </div>
+        </div>
+
+        <div class="mock-body">
+
+          <!-- CONTENT -->
+          <div class="mock-content">
+            <div class="mock-content-inner">
+
+              <!-- Header row -->
+              <div class="mock-dash-header">
+                <div>
+                  <div class="mock-dash-title-block">
+                    <span style="font-size:16px;">▦</span>
+                    <div>
+                      <div class="mock-dash-title">Dashboard</div>
+                      <div class="mock-dash-subtitle">Transformando dados em inteligência</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mock-breadcrumb-right">Home / Dashboard</div>
+              </div>
+
+              <!-- Tabs -->
+              <div class="mock-tabs">
+                <button class="mock-tab active" onclick="setTabActive(this)">Desempenho</button>
+                <button class="mock-tab" onclick="setTabActive(this)">Agentes</button>
+                <button class="mock-tab" onclick="setTabActive(this)">Análise</button>
+                <button class="mock-tab" onclick="setTabActive(this)">ROI</button>
+                <button class="mock-tab" onclick="setTabActive(this)">Consumo</button>
+              </div>
+
+              <!-- Stats -->
+              <div class="mock-stats-grid">
+                <div class="mock-card">
+                  <div class="mock-card-icon">★</div>
+                  <div class="mock-card-label">Score de atendimentos</div>
+                  <div class="mock-card-value">3.7</div>
+                  <div style="margin-bottom:6px">
+                    <span class="mock-star-filled">★★★★</span><span class="mock-stars">★</span>
+                  </div>
+                  <div class="mock-card-legend">últimos 30 dias</div>
+                </div>
+                <div class="mock-card">
+                  <div class="mock-card-icon">👍</div>
+                  <div class="mock-card-label">Like / Dislike</div>
+                  <div class="mock-like-row">
+                    <span class="mock-like-val like">👍 11</span>
+                    <span style="color:var(--mock-neutral);font-size:18px">/</span>
+                    <span class="mock-like-val dislike">👎 0</span>
+                  </div>
+                  <div class="mock-card-legend" style="margin-top:6px">de 11 interações</div>
+                </div>
+                <div class="mock-card">
+                  <div class="mock-card-icon">✓</div>
+                  <div class="mock-card-label">Atendimentos concluídos</div>
+                  <div class="mock-card-value">100.0%</div>
+                  <div class="mock-card-legend">11 de 11 atendimentos</div>
+                </div>
+                <div class="mock-card">
+                  <div class="mock-card-icon">🕐</div>
+                  <div class="mock-card-label">Tempo médio de atendimento</div>
+                  <div class="mock-card-value">5m 0s</div>
+                  <div class="mock-card-legend">em 1 conversas</div>
+                </div>
+              </div>
+
+              <!-- Bottom panels -->
+              <div class="mock-panels-grid">
+                <div class="mock-panel">
+                  <div class="mock-panel-title">Nuvem de palavras - últimos 30 dias</div>
+                  <div class="mock-panel-sub">Nuvem de Palavras - Tags dos Últimos 30 Dias</div>
+                  <div class="mock-wordcloud">
+                    <span class="mock-word" style="font-size:44px;color:var(--mock-primary);top:20px;left:10px">suporte</span>
+                    <span class="mock-word" style="font-size:28px;color:var(--mock-secondary);top:0px;left:260px">agenda</span>
+                    <span class="mock-word" style="font-size:34px;color:var(--mock-accent);top:65px;left:160px">informacao</span>
+                    <span class="mock-word" style="font-size:52px;color:var(--mock-base-content);top:90px;left:5px">atendimento</span>
+                    <span class="mock-word" style="font-size:21px;color:var(--mock-neutral);top:10px;left:130px">dúvidas</span>
+                    <span class="mock-word" style="font-size:19px;color:var(--mock-secondary);top:55px;left:310px">cancelamento</span>
+                  </div>
+                </div>
+                <div class="mock-panel">
+                  <div class="mock-panel-title">Distribuição de tempo de resposta</div>
+                  <div class="mock-pie-container">
+                    <div class="mock-pie-canvas-wrap">
+                      <canvas id="pieChart" width="140" height="140"></canvas>
+                      <div class="mock-pie-label">40%</div>
+                    </div>
+                    <div class="mock-pie-legend">
+                      <div class="mock-legend-item"><div class="mock-legend-dot" style="background:#22c55e"></div>&lt; 30s</div>
+                      <div class="mock-legend-item"><div class="mock-legend-dot" style="background:#84cc16"></div>30s - 1m</div>
+                      <div class="mock-legend-item"><div class="mock-legend-dot" style="background:#eab308"></div>1m - 3m</div>
+                      <div class="mock-legend-item"><div class="mock-legend-dot" style="background:#f97316"></div>3m - 5m</div>
+                      <div class="mock-legend-item"><div class="mock-legend-dot" style="background:#ef4444"></div>&gt; 5m</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- end inner -->
+          </div><!-- end content -->
+
+        </div><!-- end body -->
+
+        <!-- FOOTER -->
+        <div class="mock-footer">
+          <div class="mock-footer-left">
+            Versão <span id="mock-footer-version">4.0.1</span>
+            <span class="mock-ver-badge">28269521-2</span>
+            large
+          </div>
+          <div class="mock-footer-right">
+            © 2026 <strong id="mock-footer-name">Fortics IA</strong>® é uma marca registrada — Todos os direitos reservados
+          </div>
+        </div>
+
+        </div><!-- end right-col -->
+
+      </div><!-- end shell -->
+    </div><!-- end wrapper -->
+    </div><!-- end right-panel-scroll -->
+  </div><!-- end right panel -->
+
+</div><!-- end app-body -->
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal-box">
+    <div class="modal-title">Exportar configuração JSON</div>
+    <textarea class="modal-textarea" id="export-textarea" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-copy" id="copy-btn" onclick="copyExportJSON()">Copiar</button>
+      <button class="btn-modal-close" onclick="closeModal('export-modal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-box">
+    <div class="modal-title">Importar configuração JSON</div>
+    <textarea class="modal-textarea" id="import-textarea" placeholder="Cole o JSON aqui..."></textarea>
+    <div class="modal-error" id="import-error">JSON inválido. Verifique o formato e tente novamente.</div>
+    <div class="modal-actions">
+      <button class="btn-modal-apply" onclick="applyImportJSON()">Aplicar</button>
+      <button class="btn-modal-close" onclick="closeModal('import-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentTheme = 'light';
+let currentLogoTarget = null;
+const logos = { 'lm-lg': null, 'dm-lg': null, 'lm-sm': null, 'dm-sm': null };
+
+const DEFAULTS = {
+  lm: {
+    '--mock-primary':           { val: '#0066ff', label: 'Cor principal',         hint: 'links, item ativo, botões primários', var: 'LM_COLOR_PRIMARY' },
+    '--mock-primary-content':   { val: '#eef2fc', label: 'Texto sobre primária',  hint: '',                                    var: 'LM_COLOR_PRIMARY_CONTENT' },
+    '--mock-secondary':         { val: '#94aee3', label: 'Cor secundária',        hint: 'elementos de suporte',                var: 'LM_COLOR_SECONDARY' },
+    '--mock-secondary-content': { val: '#283249', label: 'Texto sobre secundária',hint: '',                                   var: 'LM_COLOR_SECONDARY_CONTENT' },
+    '--mock-accent':            { val: '#5a7fd6', label: 'Destaque',              hint: 'badges, hover states',               var: 'LM_COLOR_ACCENT' },
+    '--mock-accent-content':    { val: '#16202e', label: 'Texto sobre accent',    hint: '',                                   var: 'LM_COLOR_ACCENT_CONTENT' },
+    '--mock-neutral':           { val: '#737373', label: 'Texto neutro',          hint: 'labels',                             var: 'LM_COLOR_NEUTRAL' },
+    '--mock-neutral-content':   { val: '#ffffff', label: 'Texto sobre neutro',    hint: '',                                   var: 'LM_COLOR_NEUTRAL_CONTENT' },
+  },
+  lm_bg: {
+    '--mock-base-100':    { val: '#ffffff', label: 'Background principal',  hint: 'área de conteúdo',          var: 'LM_COLOR_BASE_100' },
+    '--mock-base-200':    { val: '#f4f5f9', label: 'Background sidebar',    hint: 'sidebar e cards',            var: 'LM_COLOR_BASE_200' },
+    '--mock-base-300':    { val: '#d5d9e8', label: 'Bordas e separadores',  hint: '',                           var: 'LM_COLOR_BASE_300' },
+    '--mock-base-content':{ val: '#4c4c4c', label: 'Texto geral',           hint: '',                           var: 'LM_COLOR_BASE_CONTENT' },
+  },
+  lm_sem: {
+    'LM_COLOR_INFO':            { val: 'oklch(74% 0.16 232.661)',   label: 'Info',             var: 'LM_COLOR_INFO' },
+    'LM_COLOR_INFO_CONTENT':    { val: 'oklch(29% 0.066 243.157)',  label: 'Info Content',     var: 'LM_COLOR_INFO_CONTENT' },
+    'LM_COLOR_SUCCESS':         { val: 'oklch(76% 0.177 163.223)',  label: 'Success',          var: 'LM_COLOR_SUCCESS' },
+    'LM_COLOR_SUCCESS_CONTENT': { val: 'oklch(37% 0.077 168.94)',   label: 'Success Content',  var: 'LM_COLOR_SUCCESS_CONTENT' },
+    'LM_COLOR_WARNING':         { val: 'oklch(82% 0.189 84.429)',   label: 'Warning',          var: 'LM_COLOR_WARNING' },
+    'LM_COLOR_WARNING_CONTENT': { val: 'oklch(41% 0.112 45.904)',   label: 'Warning Content',  var: 'LM_COLOR_WARNING_CONTENT' },
+    'LM_COLOR_ERROR':           { val: 'oklch(71% 0.194 13.428)',   label: 'Error',            var: 'LM_COLOR_ERROR' },
+    'LM_COLOR_ERROR_CONTENT':   { val: 'oklch(27% 0.105 12.094)',   label: 'Error Content',    var: 'LM_COLOR_ERROR_CONTENT' },
+  },
+  dm: {
+    '--mock-primary':           { val: '#112589', label: 'Cor principal',          hint: 'links, item ativo, botões primários', var: 'DM_COLOR_PRIMARY' },
+    '--mock-primary-content':   { val: '#eef2fc', label: 'Texto sobre primária',   hint: '',                                    var: 'DM_COLOR_PRIMARY_CONTENT' },
+    '--mock-secondary':         { val: '#94aee3', label: 'Cor secundária',         hint: 'elementos de suporte',                var: 'DM_COLOR_SECONDARY' },
+    '--mock-secondary-content': { val: '#283249', label: 'Texto sobre secundária', hint: '',                                    var: 'DM_COLOR_SECONDARY_CONTENT' },
+    '--mock-accent':            { val: '#5a7fd6', label: 'Destaque',               hint: 'badges, hover states',                var: 'DM_COLOR_ACCENT' },
+    '--mock-accent-content':    { val: '#16202e', label: 'Texto sobre accent',     hint: '',                                    var: 'DM_COLOR_ACCENT_CONTENT' },
+    '--mock-neutral':           { val: '#737373', label: 'Texto neutro',           hint: 'labels',                              var: 'DM_COLOR_NEUTRAL' },
+    '--mock-neutral-content':   { val: '#ffffff', label: 'Texto sobre neutro',     hint: '',                                    var: 'DM_COLOR_NEUTRAL_CONTENT' },
+  },
+  dm_bg: {
+    '--mock-base-100':     { val: '#1c2847', label: 'Background principal', hint: 'área de conteúdo',  var: 'DM_COLOR_BASE_100' },
+    '--mock-base-200':     { val: '#283249', label: 'Background sidebar',   hint: 'sidebar e cards',   var: 'DM_COLOR_BASE_200' },
+    '--mock-base-300':     { val: '#364264', label: 'Bordas e separadores', hint: '',                  var: 'DM_COLOR_BASE_300' },
+    '--mock-base-content': { val: '#c9d1e0', label: 'Texto geral',          hint: '',                  var: 'DM_COLOR_BASE_CONTENT' },
+  },
+  dm_sem: {
+    'DM_COLOR_INFO':            { val: 'oklch(74% 0.16 232.661)',   label: 'Info',            var: 'DM_COLOR_INFO' },
+    'DM_COLOR_INFO_CONTENT':    { val: 'oklch(29% 0.066 243.157)',  label: 'Info Content',    var: 'DM_COLOR_INFO_CONTENT' },
+    'DM_COLOR_SUCCESS':         { val: 'oklch(76% 0.177 163.223)',  label: 'Success',         var: 'DM_COLOR_SUCCESS' },
+    'DM_COLOR_SUCCESS_CONTENT': { val: 'oklch(37% 0.077 168.94)',   label: 'Success Content', var: 'DM_COLOR_SUCCESS_CONTENT' },
+    'DM_COLOR_WARNING':         { val: 'oklch(82% 0.189 84.429)',   label: 'Warning',         var: 'DM_COLOR_WARNING' },
+    'DM_COLOR_WARNING_CONTENT': { val: 'oklch(41% 0.112 45.904)',   label: 'Warning Content', var: 'DM_COLOR_WARNING_CONTENT' },
+    'DM_COLOR_ERROR':           { val: 'oklch(71% 0.194 13.428)',   label: 'Error',           var: 'DM_COLOR_ERROR' },
+    'DM_COLOR_ERROR_CONTENT':   { val: 'oklch(27% 0.105 12.094)',   label: 'Error Content',   var: 'DM_COLOR_ERROR_CONTENT' },
+  },
+};
+
+/* Live state for each css-var */
+const liveValues = {};
+
+/* ============================================================
+   RENDER COLOR ROWS
+   ============================================================ */
+function buildColorRows(containerId, colorMap, isOklchOnly = false, prefix = '') {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  // Determine theme from prefix
+  const theme = prefix.startsWith('lm') ? 'lm' : 'dm';
+
+  for (const [key, def] of Object.entries(colorMap)) {
+    const row = document.createElement('div');
+    row.className = 'color-row';
+    row.dataset.theme = theme;
+    const storeKey = prefix + key;
+    // Use liveValues if already set, otherwise use default
+    const currentVal = liveValues[storeKey] !== undefined ? liveValues[storeKey] : def.val;
+    liveValues[storeKey] = currentVal;
+
+    if (isOklchOnly) {
+      // Semantic-only: oklch text input (no swatch, no hex)
+      const isOklchVal = currentVal.startsWith('oklch');
+      row.innerHTML = `
+        <div class="color-row-top">
+          <div class="color-row-info">
+            <div class="color-row-label">${def.label}</div>
+            <div class="color-row-var">${def.var}</div>
+          </div>
+        </div>
+        <div class="color-row-bottom">
+          <span class="oklch-label">OKLCH</span>
+          <input class="color-oklch ${isOklchVal || currentVal ? 'has-value' : ''}" value="${currentVal}" data-key="${storeKey}" data-cssvar="${key}" data-theme="${theme}" placeholder="oklch(70% 0.2 150)" oninput="syncOklch(this)">
+        </div>
+      `;
+    } else {
+      // Hex + OKLCH row
+      const safeHex = /^#[0-9A-Fa-f]{6}$/i.test(currentVal) ? currentVal : '#000000';
+      const oklchVal = liveValues[storeKey + '__oklch'] || '';
+      row.innerHTML = `
+        <div class="color-row-top">
+          <input type="color" class="color-swatch" value="${safeHex}" data-key="${storeKey}" data-cssvar="${key}" data-theme="${theme}" oninput="syncSwatch(this)">
+          <input type="text" class="color-hex" value="${currentVal}" data-key="${storeKey}" data-cssvar="${key}" data-theme="${theme}" placeholder="#rrggbb" oninput="syncHex(this)">
+          <div class="color-row-info">
+            <div class="color-row-label">${def.label}</div>
+            <div class="color-row-var">${def.var}</div>
+          </div>
+        </div>
+        <div class="color-row-bottom">
+          <span class="oklch-label">OKLCH</span>
+          <input class="color-oklch ${oklchVal ? 'has-value' : ''}" value="${oklchVal}" data-key="${storeKey}__oklch" data-cssvar="${key}" data-theme="${theme}" placeholder="oklch(70% 0.2 150) — sobrescreve hex" oninput="syncOklch(this)">
+        </div>
+      `;
+    }
+    container.appendChild(row);
+  }
+}
+
+function syncSwatch(el) {
+  const key = el.dataset.key;
+  const cssvar = el.dataset.cssvar;
+  const theme = el.dataset.theme;
+  const val = el.value;
+  // Sync hex input
+  const row = el.closest('.color-row');
+  const hexInput = row.querySelector('.color-hex');
+  if (hexInput) hexInput.value = val;
+  // Clear oklch override
+  const oklchInput = row.querySelector('.color-oklch');
+  if (oklchInput) { oklchInput.value = ''; oklchInput.classList.remove('has-value'); liveValues[key + '__oklch'] = ''; }
+  liveValues[key] = val;
+  applyIfActive(theme, cssvar, val);
+}
+
+function syncHex(el) {
+  const key = el.dataset.key;
+  const cssvar = el.dataset.cssvar;
+  const theme = el.dataset.theme;
+  let val = el.value.trim();
+  // Auto-prepend # if missing and looks like hex digits
+  if (val && !val.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(val)) {
+    val = '#' + val;
+    el.value = val;
+  }
+  liveValues[key] = val;
+  // Sync color swatch if valid 6-char hex
+  if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
+    const row = el.closest('.color-row');
+    const swatch = row.querySelector('.color-swatch');
+    if (swatch) swatch.value = val;
+    // Clear oklch override
+    const oklchInput = row.querySelector('.color-oklch');
+    if (oklchInput) { oklchInput.value = ''; oklchInput.classList.remove('has-value'); liveValues[key + '__oklch'] = ''; }
+  }
+  // Apply if valid CSS color (hex 3, 4, 6, 8 or named)
+  if (CSS.supports('color', val)) {
+    applyIfActive(theme, cssvar, val);
+  }
+}
+
+function syncOklch(el) {
+  const key = el.dataset.key;
+  const cssvar = el.dataset.cssvar;
+  const theme = el.dataset.theme;
+  const val = el.value.trim();
+  liveValues[key] = val;
+
+  if (!val) {
+    el.classList.remove('has-value');
+    // Restore hex value
+    const isOklchOnly = !key.endsWith('__oklch');
+    if (!isOklchOnly) {
+      // This is a hex-row oklch override: restore hex
+      const hexKey = key.replace('__oklch', '');
+      const hexVal = liveValues[hexKey] || '';
+      if (CSS.supports('color', hexVal)) applyIfActive(theme, cssvar, hexVal);
+    }
+    return;
+  }
+  el.classList.add('has-value');
+  if (CSS.supports('color', val)) {
+    applyIfActive(theme, cssvar, val);
+  }
+}
+
+function applyIfActive(theme, cssvar, val) {
+  // theme is 'lm' or 'dm'; currentTheme is 'light' or 'dark'
+  const activeTheme = currentTheme === 'light' ? 'lm' : 'dm';
+  if (theme !== activeTheme) return;
+  document.documentElement.style.setProperty(cssvar, val);
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function setTheme(mode) {
+  currentTheme = mode;
+  document.getElementById('btn-light').classList.toggle('active', mode === 'light');
+  document.getElementById('btn-dark').classList.toggle('active', mode === 'dark');
+
+  if (mode === 'light') {
+    applyColorSet(DEFAULTS.lm, 'lm-', 'lm');
+    applyColorSet(DEFAULTS.lm_bg, 'lm-', 'lm');
+    updateLogoInMock();
+  } else {
+    applyColorSet(DEFAULTS.dm, 'dm-', 'dm');
+    applyColorSet(DEFAULTS.dm_bg, 'dm-', 'dm');
+    updateLogoInMock();
+  }
+}
+
+function applyColorSet(colorMap, prefix, theme) {
+  for (const [cssvar, def] of Object.entries(colorMap)) {
+    const storeKey = prefix + cssvar;
+    // If there's an oklch override, use it; otherwise use hex value or default
+    const oklchOverride = liveValues[storeKey + '__oklch'];
+    const val = (oklchOverride && CSS.supports('color', oklchOverride))
+      ? oklchOverride
+      : (liveValues[storeKey] || def.val);
+    document.documentElement.style.setProperty(cssvar, val);
+  }
+}
+
+function applyAllCurrentTheme() {
+  if (currentTheme === 'light') {
+    applyColorSet(DEFAULTS.lm, 'lm-', 'lm');
+    applyColorSet(DEFAULTS.lm_bg, 'lm-', 'lm');
+  } else {
+    applyColorSet(DEFAULTS.dm, 'dm-', 'dm');
+    applyColorSet(DEFAULTS.dm_bg, 'dm-', 'dm');
+  }
+}
+
+function toggleMockTheme() {
+  setTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+
+/* ============================================================
+   PRODUCT NAME & VERSION
+   ============================================================ */
+function updateProductName(val) {
+  const name = val || 'Produto';
+  const parts = name.split(' ');
+  document.getElementById('mock-logo-name').textContent = parts[0] || name;
+  document.getElementById('mock-logo-sub').textContent = parts.slice(1).join(' ') || 'IA';
+  document.getElementById('mock-footer-name').textContent = name;
+}
+
+function updateVersion(val) {
+  document.getElementById('mock-footer-version').textContent = val || '—';
+}
+
+/* ============================================================
+   LOGOS
+   ============================================================ */
+function triggerLogoUpload(areaId, logoKey) {
+  currentLogoTarget = { areaId, logoKey };
+  document.getElementById('logo-file-input').value = '';
+  document.getElementById('logo-file-input').click();
+}
+
+function handleLogoFile(input) {
+  if (!input.files || !input.files[0] || !currentLogoTarget) return;
+  const { areaId, logoKey } = currentLogoTarget;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result;
+    logos[logoKey] = b64;
+    const area = document.getElementById(areaId);
+    area.classList.add('has-logo');
+    const thumb = document.getElementById(areaId + '-thumb');
+    thumb.src = b64;
+    updateLogoInMock();
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleLogoDrop(e, areaId, logoKey) {
+  e.preventDefault();
+  const area = document.getElementById(areaId);
+  area.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  currentLogoTarget = { areaId, logoKey };
+  const reader = new FileReader();
+  reader.onload = ev => {
+    logos[logoKey] = ev.target.result;
+    area.classList.add('has-logo');
+    document.getElementById(areaId + '-thumb').src = ev.target.result;
+    updateLogoInMock();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo(e, areaId, logoKey) {
+  e.stopPropagation();
+  logos[logoKey] = null;
+  const area = document.getElementById(areaId);
+  area.classList.remove('has-logo');
+  document.getElementById(areaId + '-thumb').src = '';
+  updateLogoInMock();
+}
+
+function updateLogoInMock() {
+  const lgKey = currentTheme === 'light' ? 'lm-lg' : 'dm-lg';
+  const logo = logos[lgKey];
+  const img = document.getElementById('mock-logo-img');
+  const fallback = document.getElementById('mock-logo-fallback');
+  if (logo) {
+    img.src = logo;
+    img.style.display = 'block';
+    fallback.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    fallback.style.display = 'flex';
+  }
+}
+
+/* ============================================================
+   MENU & TABS
+   ============================================================ */
+function setMenuActive(el) {
+  document.querySelectorAll('.mock-menu-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setTabActive(el) {
+  document.querySelectorAll('.mock-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ============================================================
+   COLLAPSIBLE
+   ============================================================ */
+function toggleCollapse(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+function resetDefaults() {
+  // Clear all liveValues (includes __oklch overrides)
+  for (const k of Object.keys(liveValues)) delete liveValues[k];
+
+  // Set defaults
+  for (const [cssvar, def] of Object.entries(DEFAULTS.lm)) liveValues['lm-' + cssvar] = def.val;
+  for (const [cssvar, def] of Object.entries(DEFAULTS.lm_bg)) liveValues['lm-' + cssvar] = def.val;
+  for (const [cssvar, def] of Object.entries(DEFAULTS.dm)) liveValues['dm-' + cssvar] = def.val;
+  for (const [cssvar, def] of Object.entries(DEFAULTS.dm_bg)) liveValues['dm-' + cssvar] = def.val;
+
+  // Rebuild color rows
+  buildColorRows('lm-main-colors', DEFAULTS.lm, false, 'lm-');
+  buildColorRows('lm-bg-colors', DEFAULTS.lm_bg, false, 'lm-');
+  buildColorRows('dm-main-colors', DEFAULTS.dm, false, 'dm-');
+  buildColorRows('dm-bg-colors', DEFAULTS.dm_bg, false, 'dm-');
+
+  // Reset identity
+  document.getElementById('inp-product-name').value = 'Fortics IA';
+  document.getElementById('inp-version').value = '4.0.1';
+  updateProductName('Fortics IA');
+  updateVersion('4.0.1');
+
+  // Reset logos
+  for (const k of Object.keys(logos)) logos[k] = null;
+  ['logo-lm-lg','logo-dm-lg','logo-lm-sm','logo-dm-sm'].forEach(id => {
+    document.getElementById(id).classList.remove('has-logo');
+    document.getElementById(id + '-thumb').src = '';
+  });
+  updateLogoInMock();
+
+  // Apply current theme
+  applyAllCurrentTheme();
+}
+
+/* ============================================================
+   EXPORT JSON
+   ============================================================ */
+function buildExportJSON() {
+  const pn = document.getElementById('inp-product-name').value;
+  const ver = document.getElementById('inp-version').value;
+
+  const lmColors = {};
+  for (const [cssvar, def] of Object.entries(DEFAULTS.lm)) {
+    const hexKey = 'lm-' + cssvar;
+    const oklchKey = hexKey + '__oklch';
+    lmColors[def.var] = (liveValues[oklchKey] && CSS.supports('color', liveValues[oklchKey]))
+      ? liveValues[oklchKey] : (liveValues[hexKey] || def.val);
+  }
+  for (const [cssvar, def] of Object.entries(DEFAULTS.lm_bg)) {
+    const hexKey = 'lm-' + cssvar;
+    const oklchKey = hexKey + '__oklch';
+    lmColors[def.var] = (liveValues[oklchKey] && CSS.supports('color', liveValues[oklchKey]))
+      ? liveValues[oklchKey] : (liveValues[hexKey] || def.val);
+  }
+
+  const dmColors = {};
+  for (const [cssvar, def] of Object.entries(DEFAULTS.dm)) {
+    const hexKey = 'dm-' + cssvar;
+    const oklchKey = hexKey + '__oklch';
+    dmColors[def.var] = (liveValues[oklchKey] && CSS.supports('color', liveValues[oklchKey]))
+      ? liveValues[oklchKey] : (liveValues[hexKey] || def.val);
+  }
+  for (const [cssvar, def] of Object.entries(DEFAULTS.dm_bg)) {
+    const hexKey = 'dm-' + cssvar;
+    const oklchKey = hexKey + '__oklch';
+    dmColors[def.var] = (liveValues[oklchKey] && CSS.supports('color', liveValues[oklchKey]))
+      ? liveValues[oklchKey] : (liveValues[hexKey] || def.val);
+  }
+
+  return JSON.stringify({
+    product_name: pn,
+    version: ver,
+    logos: {
+      LM_LOGO_LG: logos['lm-lg'],
+      DM_LOGO_LG: logos['dm-lg'],
+      LM_LOGO_SM: logos['lm-sm'],
+      DM_LOGO_SM: logos['dm-sm'],
+    },
+    light_mode: lmColors,
+    dark_mode: dmColors,
+  }, null, 2);
+}
+
+function openExportModal() {
+  const json = buildExportJSON();
+  document.getElementById('export-textarea').value = json;
+  document.getElementById('export-modal').classList.add('open');
+}
+
+function copyExportJSON() {
+  const ta = document.getElementById('export-textarea');
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copiado! ✓';
+    setTimeout(() => btn.textContent = 'Copiar', 2000);
+  });
+}
+
+/* ============================================================
+   IMPORT JSON
+   ============================================================ */
+function openImportModal() {
+  document.getElementById('import-textarea').value = '';
+  document.getElementById('import-error').style.display = 'none';
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function applyImportJSON() {
+  const raw = document.getElementById('import-textarea').value.trim();
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch {
+    document.getElementById('import-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('import-error').style.display = 'none';
+
+  if (parsed.product_name) { document.getElementById('inp-product-name').value = parsed.product_name; updateProductName(parsed.product_name); }
+  if (parsed.version) { document.getElementById('inp-version').value = parsed.version; updateVersion(parsed.version); }
+
+  // Logos
+  if (parsed.logos) {
+    const mapping = { LM_LOGO_LG: 'lm-lg', DM_LOGO_LG: 'dm-lg', LM_LOGO_SM: 'lm-sm', DM_LOGO_SM: 'dm-sm' };
+    const areaId = { 'lm-lg': 'logo-lm-lg', 'dm-lg': 'logo-dm-lg', 'lm-sm': 'logo-lm-sm', 'dm-sm': 'logo-dm-sm' };
+    for (const [jsonKey, logoKey] of Object.entries(mapping)) {
+      if (parsed.logos[jsonKey]) {
+        logos[logoKey] = parsed.logos[jsonKey];
+        document.getElementById(areaId[logoKey]).classList.add('has-logo');
+        document.getElementById(areaId[logoKey] + '-thumb').src = parsed.logos[jsonKey];
+      }
+    }
+    updateLogoInMock();
+  }
+
+  // LM colors
+  if (parsed.light_mode) {
+    const varMap = buildVarMap('lm');
+    for (const [varName, val] of Object.entries(parsed.light_mode)) {
+      if (varMap[varName]) {
+        const { storeKey, cssvar } = varMap[varName];
+        liveValues[storeKey] = val;
+      }
+    }
+  }
+  // DM colors
+  if (parsed.dark_mode) {
+    const varMap = buildVarMap('dm');
+    for (const [varName, val] of Object.entries(parsed.dark_mode)) {
+      if (varMap[varName]) {
+        const { storeKey, cssvar } = varMap[varName];
+        liveValues[storeKey] = val;
+      }
+    }
+  }
+
+  // Rebuild UI
+  buildColorRows('lm-main-colors', DEFAULTS.lm, false, 'lm-');
+  buildColorRows('lm-bg-colors', DEFAULTS.lm_bg, false, 'lm-');
+  buildColorRows('dm-main-colors', DEFAULTS.dm, false, 'dm-');
+  buildColorRows('dm-bg-colors', DEFAULTS.dm_bg, false, 'dm-');
+
+  // Re-populate input values from liveValues
+  populateInputsFromLive();
+
+  applyAllCurrentTheme();
+  closeModal('import-modal');
+}
+
+function populateInputsFromLive() {
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const k = el.dataset.key;
+    if (liveValues[k] !== undefined) el.value = liveValues[k];
+  });
+}
+
+function buildVarMap(prefix) {
+  const out = {};
+  const sets = prefix === 'lm'
+    ? { ...DEFAULTS.lm, ...DEFAULTS.lm_bg }
+    : { ...DEFAULTS.dm, ...DEFAULTS.dm_bg };
+  for (const [cssvar, def] of Object.entries(sets)) {
+    out[def.var] = { storeKey: prefix + '-' + cssvar, cssvar };
+  }
+  return out;
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+/* ============================================================
+   PIE CHART
+   ============================================================ */
+function initPieChart() {
+  const ctx = document.getElementById('pieChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['< 30s', '30s - 1m', '1m - 3m', '3m - 5m', '> 5m'],
+      datasets: [{
+        data: [30, 5, 5, 40, 20],
+        backgroundColor: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
+        borderWidth: 2,
+        borderColor: '#ffffff',
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true },
+      },
+      cutout: '0%',
+    }
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  buildColorRows('lm-main-colors', DEFAULTS.lm, false, 'lm-');
+  buildColorRows('lm-bg-colors', DEFAULTS.lm_bg, false, 'lm-');
+  buildColorRows('dm-main-colors', DEFAULTS.dm, false, 'dm-');
+  buildColorRows('dm-bg-colors', DEFAULTS.dm_bg, false, 'dm-');
+
+  applyAllCurrentTheme();
+
+  if (typeof Chart !== 'undefined') {
+    initPieChart();
+  } else {
+    // Retry once Chart.js loads
+    document.querySelector('script[src*="chart.js"]').addEventListener('load', initPieChart);
+  }
+}
+
+// Prevent color inputs from firing drag events on logo areas
+document.addEventListener('DOMContentLoaded', () => { init(); lucide.createIcons(); });
+
+function toggleSidebar() {
+  const sidebar = document.querySelector('.mock-sidebar');
+  sidebar.classList.toggle('collapsed');
+}
+
+let currentZoom = 0.85;
+function setZoomValue(val) {
+  currentZoom = Math.min(1.2, Math.max(0.4, val));
+  document.getElementById('mock-wrapper').style.setProperty('--mock-zoom', currentZoom);
+  document.getElementById('zoom-label').textContent = Math.round(currentZoom * 100) + '%';
+  document.getElementById('zoom-slider').value = currentZoom;
+}
+function setZoom(delta) { setZoomValue(currentZoom + delta); }
+function setZoomFromSlider(val) { setZoomValue(parseFloat(val)); }
+</script>
+</body>
+</html>
