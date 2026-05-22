@@ -1671,11 +1671,20 @@ function setTheme(mode) {
   document.getElementById('btn-light').classList.toggle('active', mode === 'light');
   document.getElementById('btn-dark').classList.toggle('active', mode === 'dark');
 
+  // Open the matching color section, close the other
+  const lmHeader = document.querySelector('.collapsible-header:has(+ #lm-colors-body)');
+  const dmHeader = document.querySelector('.collapsible-header:has(+ #dm-colors-body)');
+  const lmBody = document.getElementById('lm-colors-body');
+  const dmBody = document.getElementById('dm-colors-body');
   if (mode === 'light') {
+    lmHeader.classList.add('open'); lmBody.classList.add('open');
+    dmHeader.classList.remove('open'); dmBody.classList.remove('open');
     applyColorSet(DEFAULTS.lm, 'lm-', 'lm');
     applyColorSet(DEFAULTS.lm_bg, 'lm-', 'lm');
     updateLogoInMock();
   } else {
+    dmHeader.classList.add('open'); dmBody.classList.add('open');
+    lmHeader.classList.remove('open'); lmBody.classList.remove('open');
     applyColorSet(DEFAULTS.dm, 'dm-', 'dm');
     applyColorSet(DEFAULTS.dm_bg, 'dm-', 'dm');
     updateLogoInMock();
