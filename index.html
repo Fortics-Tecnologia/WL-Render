@@ -413,6 +413,73 @@
   .color-oklch:focus { border-color: #7c3aed; background: #fff; }
   .color-oklch.has-value { border-color: #7c3aed; background: #f5f3ff; color: #5b21b6; }
 
+  /* Color info button */
+  .color-info-btn {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    font-style: italic;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    line-height: 1;
+    transition: all .15s;
+  }
+  .color-info-btn:hover {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+  }
+
+  /* Color tooltip */
+  .color-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #1e293b;
+    color: #f1f5f9;
+    border-radius: 8px;
+    padding: 9px 12px;
+    max-width: 230px;
+    min-width: 160px;
+    pointer-events: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,.3);
+    display: none;
+    border: 1px solid #334155;
+  }
+  .color-tooltip.visible { display: block; }
+  .color-tooltip-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .color-tooltip-item {
+    font-size: 11px;
+    color: #cbd5e1;
+    line-height: 1.4;
+    padding: 1px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .color-tooltip-item::before {
+    content: '·';
+    color: #3b82f6;
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
   /* Panel footer */
   .left-panel-footer {
     padding: 12px 16px;
@@ -447,7 +514,7 @@
   .zoom-toolbar {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 8px;
     padding: 8px 16px;
     background: #d1d5db;
@@ -1154,6 +1221,232 @@
     transition: all .15s;
   }
   .btn-modal-close:hover { border-color: #94a3b8; color: #1e293b; }
+
+  /* ===================== VIEW SWITCHER TABS ===================== */
+  .view-tabs {
+    display: flex;
+    background: #e2e6f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .view-tab-btn {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  .view-tab-btn.active {
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+
+  /* ===================== FAVICON UPLOAD ===================== */
+  .favicon-upload-area {
+    border: 1.5px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all .15s;
+    background: #fff;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+  }
+  .favicon-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+  .favicon-upload-area.dragover { border-color: #3b82f6; background: #dbeafe; }
+  .favicon-upload-placeholder { display: flex; align-items: center; gap: 8px; }
+  .favicon-upload-preview { display: none; align-items: center; gap: 8px; width: 100%; }
+  .favicon-upload-area.has-favicon .favicon-upload-preview { display: flex; }
+  .favicon-upload-area.has-favicon .favicon-upload-placeholder { display: none; }
+  .favicon-preview-img { width: 32px; height: 32px; object-fit: contain; border-radius: 4px; }
+
+  /* ===================== LOGIN MOCK ===================== */
+  .mock-login-shell {
+    width: 1280px;
+    height: 800px;
+    display: flex;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.1);
+  }
+  .mock-login-form-panel {
+    width: 29%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--mock-base-100);
+    position: relative;
+    flex-shrink: 0;
+    transition: background .25s;
+  }
+  .mock-login-toggle-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: 1px solid var(--mock-base-300);
+    cursor: default;
+    color: var(--mock-base-content);
+    opacity: 0.6;
+    font-size: 15px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+  .mock-login-header {
+    height: 130px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 10px 16px;
+  }
+  .mock-login-logo-img {
+    max-width: 80%;
+    max-height: 60px;
+    object-fit: contain;
+    display: none;
+  }
+  .mock-login-logo-fallback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mock-login-logo-star {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--mock-primary);
+    line-height: 1;
+  }
+  .mock-login-logo-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--mock-primary);
+    letter-spacing: -0.5px;
+  }
+  .mock-login-form-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 56px 30px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mock-login-input {
+    height: 40px;
+    border-bottom: 1px solid var(--mock-base-300);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .mock-login-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 4px;
+  }
+  .mock-login-input-icon {
+    font-size: 14px;
+    color: var(--mock-neutral);
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+  .mock-login-input-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  .mock-login-input-label {
+    font-size: 10px;
+    color: var(--mock-neutral);
+    opacity: 0.6;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .mock-login-input-value {
+    font-size: 13px;
+    color: var(--mock-base-content);
+    line-height: 1;
+  }
+  .mock-login-input-eye {
+    font-size: 14px;
+    color: var(--mock-neutral);
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+  .mock-login-submit {
+    width: 100%;
+    height: 40px;
+    background: var(--mock-primary);
+    color: var(--mock-primary-content);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    border-radius: 6px;
+    border: none;
+    cursor: default;
+    margin-top: 6px;
+  }
+  .mock-login-forgot {
+    font-size: 12px;
+    text-align: center;
+    color: var(--mock-neutral);
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+  .mock-login-forgot b {
+    color: var(--mock-primary);
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .mock-login-banner-panel {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(to top right, #c7d2fe 0%, transparent 60%);
+    overflow: hidden;
+  }
+  .mock-login-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .mock-login-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top right, rgba(199,210,254,0.4), transparent);
+  }
+  .mock-login-banner-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #9ca3af;
+  }
+  .mock-login-banner-placeholder-icon { font-size: 48px; opacity: 0.4; }
+  .mock-login-banner-placeholder-text { font-size: 13px; font-weight: 500; opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -1182,6 +1475,27 @@
         <div class="field-row">
           <label class="field-label">Nome do Produto</label>
           <input class="field-input" id="inp-product-name" type="text" value="Fortics IA" oninput="updateProductName(this.value)">
+        </div>
+        <div class="field-row">
+          <label class="field-label">Favicon</label>
+          <div id="favicon-upload-area" class="favicon-upload-area" onclick="triggerFaviconUpload()" ondrop="handleFaviconDrop(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+            <div class="favicon-upload-placeholder">
+              <span style="font-size:18px;opacity:.4">🔖</span>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#64748b">Favicon</div>
+                <div style="font-size:9px;color:#94a3b8">SVG, PNG, ICO</div>
+              </div>
+            </div>
+            <div class="favicon-upload-preview">
+              <img class="favicon-preview-img" id="favicon-preview-img" src="" alt="">
+              <div style="flex:1">
+                <div style="font-size:10px;font-weight:600;color:#334155" id="favicon-preview-name">favicon</div>
+                <div style="font-size:9px;color:#94a3b8">Clique para trocar</div>
+              </div>
+              <button class="logo-remove" onclick="removeFavicon(event)">×</button>
+            </div>
+          </div>
+          <input type="file" id="favicon-file-input" accept=".svg,.png,.ico,image/svg+xml,image/png,image/x-icon" style="display:none" onchange="handleFaviconFile(this)">
         </div>
       </div>
 
@@ -1237,6 +1551,15 @@
         <input type="file" id="logo-file-input" accept=".svg,.png,image/svg+xml,image/png" style="display:none" onchange="handleLogoFile(this)">
       </div>
 
+      <!-- LOGIN PAGE BANNER -->
+      <div class="panel-section">
+        <div class="section-title">Login — Banner</div>
+        <div class="field-row">
+          <label class="field-label">URL da imagem de fundo (painel direito)</label>
+          <input class="field-input" id="inp-banner-url" type="url" placeholder="https://exemplo.com/imagem.jpg" oninput="updateBannerUrl(this.value)">
+        </div>
+      </div>
+
       <!-- TEMA -->
       <div class="panel-section">
         <div class="section-title">Tema</div>
@@ -1290,11 +1613,17 @@
   <!-- RIGHT PANEL -->
   <div class="right-panel">
     <div class="zoom-toolbar">
-      <button class="zoom-btn" onclick="setZoom(-0.05)">&#8722;</button>
-      <input class="zoom-slider" id="zoom-slider" type="range" min="0.4" max="1.2" step="0.05" value="0.85" oninput="setZoomFromSlider(this.value)">
-      <button class="zoom-btn" onclick="setZoom(0.05)">&#43;</button>
-      <span class="zoom-label" id="zoom-label">85%</span>
-      <button class="zoom-reset" onclick="setZoomValue(0.85)">Reset</button>
+      <div class="view-tabs">
+        <button class="view-tab-btn active" id="view-tab-dashboard" onclick="switchView('dashboard')">🖥 Dashboard</button>
+        <button class="view-tab-btn" id="view-tab-login" onclick="switchView('login')">🔐 Login</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="zoom-btn" onclick="setZoom(-0.05)">&#8722;</button>
+        <input class="zoom-slider" id="zoom-slider" type="range" min="0.4" max="1.2" step="0.05" value="0.85" oninput="setZoomFromSlider(this.value)">
+        <button class="zoom-btn" onclick="setZoom(0.05)">&#43;</button>
+        <span class="zoom-label" id="zoom-label">85%</span>
+        <button class="zoom-reset" onclick="setZoomValue(0.85)">Reset</button>
+      </div>
     </div>
     <div class="right-panel-scroll">
     <div class="mock-wrapper" id="mock-wrapper">
@@ -1462,6 +1791,63 @@
 
       </div><!-- end shell -->
     </div><!-- end wrapper -->
+
+    <!-- LOGIN MOCK -->
+    <div class="mock-wrapper" id="mock-login-wrapper" style="display:none">
+      <div class="mock-login-shell">
+
+        <!-- 29% form panel -->
+        <div class="mock-login-form-panel" id="mock-login-form-panel">
+          <button class="mock-login-toggle-btn" id="mock-login-toggle-btn">🌙</button>
+          <div class="mock-login-header">
+            <img class="mock-login-logo-img" id="mock-login-logo-img" src="" alt="">
+            <div class="mock-login-logo-fallback" id="mock-login-logo-fallback">
+              <span class="mock-login-logo-star">✱</span>
+              <span class="mock-login-logo-name" id="mock-login-logo-name">Fortics IA</span>
+            </div>
+          </div>
+          <div class="mock-login-form-body">
+            <!-- Email -->
+            <div class="mock-login-input">
+              <div class="mock-login-input-row">
+                <span class="mock-login-input-icon">✉</span>
+                <div class="mock-login-input-inner">
+                  <span class="mock-login-input-label">E-mail</span>
+                  <span class="mock-login-input-value">usuario@empresa.com</span>
+                </div>
+              </div>
+            </div>
+            <!-- Password -->
+            <div class="mock-login-input">
+              <div class="mock-login-input-row">
+                <span class="mock-login-input-icon">🔒</span>
+                <div class="mock-login-input-inner">
+                  <span class="mock-login-input-label">Senha</span>
+                  <span class="mock-login-input-value">••••••••</span>
+                </div>
+                <span class="mock-login-input-eye">👁</span>
+              </div>
+            </div>
+            <!-- Submit -->
+            <button class="mock-login-submit">ENTRAR</button>
+            <!-- Forgot password -->
+            <div class="mock-login-forgot">Esqueceu a <b>senha</b>?</div>
+          </div>
+        </div>
+
+        <!-- 71% banner panel -->
+        <div class="mock-login-banner-panel" id="mock-login-banner-panel">
+          <img class="mock-login-banner-img" id="mock-login-banner-img" src="" alt="">
+          <div class="mock-login-banner-overlay" id="mock-login-banner-overlay" style="display:none"></div>
+          <div class="mock-login-banner-placeholder" id="mock-login-banner-placeholder">
+            <span class="mock-login-banner-placeholder-icon">🖼</span>
+            <span class="mock-login-banner-placeholder-text">Arraste ou faça upload do banner</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- end login wrapper -->
+
     </div><!-- end right-panel-scroll -->
   </div><!-- end right panel -->
 
@@ -1502,13 +1888,21 @@
   </div>
 </div>
 
+<!-- COLOR TOOLTIP -->
+<div class="color-tooltip" id="color-tooltip">
+  <div class="color-tooltip-title">Componentes afetados</div>
+  <div id="color-tooltip-body"></div>
+</div>
+
 <script>
 /* ============================================================
    STATE
    ============================================================ */
 let currentTheme = 'light';
+let currentView = 'dashboard';
 let currentLogoTarget = null;
-const logos = { 'lm-lg': null, 'dm-lg': null, 'lm-sm': null, 'dm-sm': null };
+let bannerUrl = '';
+const logos = { 'lm-lg': null, 'dm-lg': null, 'lm-sm': null, 'dm-sm': null, 'favicon': null };
 
 const DEFAULTS = {
   lm: {
@@ -1565,6 +1959,38 @@ const DEFAULTS = {
   },
 };
 
+/* Components affected by each CSS variable */
+const VAR_COMPONENTS = {
+  '--mock-primary':           ['Fundo da topbar', 'Item ativo no menu', 'Aba ativa (borda)', 'Label dos cards', 'Título dos painéis', 'Logo na sidebar', 'Botão ENTRAR (login)'],
+  '--mock-primary-content':   ['Texto e ícones da topbar', 'Texto do item ativo', 'Links de navegação', 'Avatar de usuário'],
+  '--mock-secondary':         ['Nuvem de palavras', 'Elementos de suporte visual'],
+  '--mock-secondary-content': ['Texto sobre cor secundária'],
+  '--mock-accent':            ['Nuvem de palavras (destaque)', 'Hover states', 'Badges'],
+  '--mock-accent-content':    ['Texto sobre cor de destaque'],
+  '--mock-neutral':           ['Breadcrumb', 'Menu itens inativos', 'Labels dos inputs (login)', 'Abas inativas', 'Legendas dos cards', 'Texto do footer'],
+  '--mock-neutral-content':   ['Texto sobre cor neutra'],
+  '--mock-base-100':          ['Área de conteúdo (fundo)', 'Fundo dos cards', 'Fundo do formulário (login, light)'],
+  '--mock-base-200':          ['Fundo da sidebar', 'Footer do dashboard', 'Fundo do formulário (login, dark)'],
+  '--mock-base-300':          ['Bordas dos cards', 'Separadores do menu', 'Divisores de seção', 'Bordas dos inputs'],
+  '--mock-base-content':      ['Títulos do dashboard', 'Valores dos cards', 'Labels do menu', 'Nuvem de palavras'],
+  'LM_COLOR_INFO':            ['Alertas informativos', 'Badges de info'],
+  'LM_COLOR_INFO_CONTENT':    ['Texto sobre cor de info'],
+  'LM_COLOR_SUCCESS':         ['Alertas de sucesso', 'Badges de sucesso', 'Status positivo'],
+  'LM_COLOR_SUCCESS_CONTENT': ['Texto sobre cor de sucesso'],
+  'LM_COLOR_WARNING':         ['Alertas de aviso', 'Badges de warning'],
+  'LM_COLOR_WARNING_CONTENT': ['Texto sobre cor de aviso'],
+  'LM_COLOR_ERROR':           ['Alertas de erro', 'Badges de erro', 'Status negativo'],
+  'LM_COLOR_ERROR_CONTENT':   ['Texto sobre cor de erro'],
+  'DM_COLOR_INFO':            ['Alertas informativos', 'Badges de info'],
+  'DM_COLOR_INFO_CONTENT':    ['Texto sobre cor de info'],
+  'DM_COLOR_SUCCESS':         ['Alertas de sucesso', 'Badges de sucesso', 'Status positivo'],
+  'DM_COLOR_SUCCESS_CONTENT': ['Texto sobre cor de sucesso'],
+  'DM_COLOR_WARNING':         ['Alertas de aviso', 'Badges de warning'],
+  'DM_COLOR_WARNING_CONTENT': ['Texto sobre cor de aviso'],
+  'DM_COLOR_ERROR':           ['Alertas de erro', 'Badges de erro', 'Status negativo'],
+  'DM_COLOR_ERROR_CONTENT':   ['Texto sobre cor de erro'],
+};
+
 /* Live state for each css-var */
 const liveValues = {};
 
@@ -1586,13 +2012,20 @@ function buildColorRows(containerId, colorMap, isOklchOnly = false, prefix = '')
     const currentVal = liveValues[storeKey] !== undefined ? liveValues[storeKey] : def.val;
     liveValues[storeKey] = currentVal;
 
+    const infoBtn = VAR_COMPONENTS[key]
+      ? `<button class="color-info-btn" onmouseenter="showColorTooltip(this,'${key}')" onmouseleave="hideColorTooltip()">i</button>`
+      : '';
+
     if (isOklchOnly) {
       // Semantic-only: oklch text input (no swatch, no hex)
       const isOklchVal = currentVal.startsWith('oklch');
       row.innerHTML = `
         <div class="color-row-top">
           <div class="color-row-info">
-            <div class="color-row-label">${def.label}</div>
+            <div style="display:flex;align-items:center;gap:3px">
+              <div class="color-row-label">${def.label}</div>
+              ${infoBtn}
+            </div>
             <div class="color-row-var">${def.var}</div>
           </div>
         </div>
@@ -1610,7 +2043,10 @@ function buildColorRows(containerId, colorMap, isOklchOnly = false, prefix = '')
           <input type="color" class="color-swatch" value="${safeHex}" data-key="${storeKey}" data-cssvar="${key}" data-theme="${theme}" oninput="syncSwatch(this)">
           <input type="text" class="color-hex" value="${currentVal}" data-key="${storeKey}" data-cssvar="${key}" data-theme="${theme}" placeholder="#rrggbb" oninput="syncHex(this)">
           <div class="color-row-info">
-            <div class="color-row-label">${def.label}</div>
+            <div style="display:flex;align-items:center;gap:3px">
+              <div class="color-row-label">${def.label}</div>
+              ${infoBtn}
+            </div>
             <div class="color-row-var">${def.var}</div>
           </div>
         </div>
@@ -1622,6 +2058,32 @@ function buildColorRows(containerId, colorMap, isOklchOnly = false, prefix = '')
     }
     container.appendChild(row);
   }
+}
+
+/* ============================================================
+   COLOR TOOLTIP
+   ============================================================ */
+const _colorTooltip = () => document.getElementById('color-tooltip');
+
+function showColorTooltip(btn, cssvar) {
+  const items = VAR_COMPONENTS[cssvar];
+  if (!items) return;
+  const tip = _colorTooltip();
+  document.getElementById('color-tooltip-body').innerHTML =
+    items.map(t => `<div class="color-tooltip-item">${t}</div>`).join('');
+  tip.classList.add('visible');
+  const rect = btn.getBoundingClientRect();
+  const tipW = 230;
+  let left = rect.right + 8;
+  if (left + tipW > window.innerWidth - 8) left = rect.left - tipW - 8;
+  let top = rect.top - 4;
+  if (top + tip.offsetHeight > window.innerHeight - 8) top = window.innerHeight - tip.offsetHeight - 8;
+  tip.style.left = left + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
+}
+
+function hideColorTooltip() {
+  _colorTooltip().classList.remove('visible');
 }
 
 function syncSwatch(el) {
@@ -1717,12 +2179,14 @@ function setTheme(mode) {
     applyColorSet(DEFAULTS.lm, 'lm-', 'lm');
     applyColorSet(DEFAULTS.lm_bg, 'lm-', 'lm');
     updateLogoInMock();
+    updateLoginMock();
   } else {
     dmHeader.classList.add('open'); dmBody.classList.add('open');
     lmHeader.classList.remove('open'); lmBody.classList.remove('open');
     applyColorSet(DEFAULTS.dm, 'dm-', 'dm');
     applyColorSet(DEFAULTS.dm_bg, 'dm-', 'dm');
     updateLogoInMock();
+    updateLoginMock();
   }
 }
 
@@ -1761,6 +2225,8 @@ function updateProductName(val) {
   document.getElementById('mock-logo-name').textContent = parts[0] || name;
   document.getElementById('mock-logo-sub').textContent = parts.slice(1).join(' ') || 'IA';
   document.getElementById('mock-footer-name').textContent = name;
+  const loginNameEl = document.getElementById('mock-login-logo-name');
+  if (loginNameEl) loginNameEl.textContent = name;
 }
 
 /* ============================================================
@@ -1815,6 +2281,63 @@ function removeLogo(e, areaId, logoKey) {
   updateLogoInMock();
 }
 
+/* ============================================================
+   FAVICON
+   ============================================================ */
+function triggerFaviconUpload() {
+  document.getElementById('favicon-file-input').value = '';
+  document.getElementById('favicon-file-input').click();
+}
+
+function handleFaviconFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    logos['favicon'] = e.target.result;
+    const area = document.getElementById('favicon-upload-area');
+    area.classList.add('has-favicon');
+    document.getElementById('favicon-preview-img').src = e.target.result;
+    document.getElementById('favicon-preview-name').textContent = file.name;
+    updatePageFavicon(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleFaviconDrop(e) {
+  e.preventDefault();
+  const area = document.getElementById('favicon-upload-area');
+  area.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    logos['favicon'] = ev.target.result;
+    area.classList.add('has-favicon');
+    document.getElementById('favicon-preview-img').src = ev.target.result;
+    document.getElementById('favicon-preview-name').textContent = file.name;
+    updatePageFavicon(ev.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFavicon(e) {
+  e.stopPropagation();
+  logos['favicon'] = null;
+  document.getElementById('favicon-upload-area').classList.remove('has-favicon');
+  document.getElementById('favicon-preview-img').src = '';
+}
+
+function updatePageFavicon(dataUrl) {
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  link.href = dataUrl;
+}
+
 function updateLogoInMock() {
   const lgKey = currentTheme === 'light' ? 'lm-lg' : 'dm-lg';
   const logo = logos[lgKey];
@@ -1828,6 +2351,73 @@ function updateLogoInMock() {
     img.style.display = 'none';
     fallback.style.display = 'flex';
   }
+  updateLoginMock();
+}
+
+/* ============================================================
+   LOGIN MOCK
+   ============================================================ */
+function switchView(view) {
+  currentView = view;
+  document.getElementById('view-tab-dashboard').classList.toggle('active', view === 'dashboard');
+  document.getElementById('view-tab-login').classList.toggle('active', view === 'login');
+  document.getElementById('mock-wrapper').style.display = view === 'dashboard' ? '' : 'none';
+  document.getElementById('mock-login-wrapper').style.display = view === 'login' ? '' : 'none';
+  if (view === 'login') updateLoginMock();
+}
+
+function updateBannerUrl(val) {
+  bannerUrl = (val || '').trim();
+  updateLoginMock();
+}
+
+function updateLoginMock() {
+  const isDark = currentTheme === 'dark';
+
+  // Form panel background
+  const formPanel = document.getElementById('mock-login-form-panel');
+  if (formPanel) formPanel.style.backgroundColor = isDark ? 'var(--mock-base-200)' : 'var(--mock-base-100)';
+
+  // Toggle button icon (decorative)
+  const toggleBtn = document.getElementById('mock-login-toggle-btn');
+  if (toggleBtn) toggleBtn.textContent = isDark ? '☀️' : '🌙';
+
+  // Logo: use dashboard logos (lm-lg / dm-lg)
+  const logoData = logos[isDark ? 'dm-lg' : 'lm-lg'];
+
+  const img = document.getElementById('mock-login-logo-img');
+  const fallback = document.getElementById('mock-login-logo-fallback');
+  if (img && fallback) {
+    if (logoData) {
+      img.src = logoData;
+      img.style.display = 'block';
+      fallback.style.display = 'none';
+    } else {
+      img.style.display = 'none';
+      fallback.style.display = 'flex';
+    }
+  }
+
+  // Banner (URL pública)
+  const bannerImg = document.getElementById('mock-login-banner-img');
+  const bannerOverlay = document.getElementById('mock-login-banner-overlay');
+  const bannerPlaceholder = document.getElementById('mock-login-banner-placeholder');
+  if (bannerImg && bannerPlaceholder) {
+    if (bannerUrl) {
+      bannerImg.src = bannerUrl;
+      bannerImg.style.display = 'block';
+      bannerOverlay.style.display = 'block';
+      bannerPlaceholder.style.display = 'none';
+    } else {
+      bannerImg.style.display = 'none';
+      bannerOverlay.style.display = 'none';
+      bannerPlaceholder.style.display = 'flex';
+    }
+  }
+
+  // Product name in login
+  const nameEl = document.getElementById('mock-login-logo-name');
+  if (nameEl) nameEl.textContent = document.getElementById('inp-product-name').value || 'Produto';
 }
 
 /* ============================================================
@@ -1878,9 +2468,18 @@ function resetDefaults() {
   // Reset logos
   for (const k of Object.keys(logos)) logos[k] = null;
   ['logo-lm-lg','logo-dm-lg','logo-lm-sm','logo-dm-sm'].forEach(id => {
-    document.getElementById(id).classList.remove('has-logo');
-    document.getElementById(id + '-thumb').src = '';
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('has-logo'); document.getElementById(id + '-thumb').src = ''; }
   });
+  // Reset banner URL
+  bannerUrl = '';
+  const bannerInp = document.getElementById('inp-banner-url');
+  if (bannerInp) bannerInp.value = '';
+  // Reset favicon
+  const faviconArea = document.getElementById('favicon-upload-area');
+  if (faviconArea) faviconArea.classList.remove('has-favicon');
+  const faviconImg = document.getElementById('favicon-preview-img');
+  if (faviconImg) faviconImg.src = '';
   updateLogoInMock();
 
   // Apply current theme
@@ -1928,6 +2527,8 @@ function buildExportJSON() {
       DM_LOGO_LG: logos['dm-lg'],
       LM_LOGO_SM: logos['lm-sm'],
       DM_LOGO_SM: logos['dm-sm'],
+      BANNER_IMG_URL: bannerUrl || null,
+      FAVICON: logos['favicon'],
     },
     light_mode: lmColors,
     dark_mode: dmColors,
@@ -1984,14 +2585,38 @@ function applyImportJSON() {
 
   // Logos
   if (parsed.logos) {
-    const mapping = { LM_LOGO_LG: 'lm-lg', DM_LOGO_LG: 'dm-lg', LM_LOGO_SM: 'lm-sm', DM_LOGO_SM: 'dm-sm' };
-    const areaId = { 'lm-lg': 'logo-lm-lg', 'dm-lg': 'logo-dm-lg', 'lm-sm': 'logo-lm-sm', 'dm-sm': 'logo-dm-sm' };
+    const mapping = {
+      LM_LOGO_LG: 'lm-lg', DM_LOGO_LG: 'dm-lg',
+      LM_LOGO_SM: 'lm-sm', DM_LOGO_SM: 'dm-sm'
+    };
+    const areaId = {
+      'lm-lg': 'logo-lm-lg', 'dm-lg': 'logo-dm-lg',
+      'lm-sm': 'logo-lm-sm', 'dm-sm': 'logo-dm-sm'
+    };
     for (const [jsonKey, logoKey] of Object.entries(mapping)) {
       if (parsed.logos[jsonKey]) {
         logos[logoKey] = parsed.logos[jsonKey];
-        document.getElementById(areaId[logoKey]).classList.add('has-logo');
-        document.getElementById(areaId[logoKey] + '-thumb').src = parsed.logos[jsonKey];
+        const el = document.getElementById(areaId[logoKey]);
+        if (el) {
+          el.classList.add('has-logo');
+          document.getElementById(areaId[logoKey] + '-thumb').src = parsed.logos[jsonKey];
+        }
       }
+    }
+    if (parsed.logos.BANNER_IMG_URL) {
+      bannerUrl = parsed.logos.BANNER_IMG_URL;
+      const inp = document.getElementById('inp-banner-url');
+      if (inp) inp.value = bannerUrl;
+      updateLoginMock();
+    }
+    if (parsed.logos.FAVICON) {
+      logos['favicon'] = parsed.logos.FAVICON;
+      const area = document.getElementById('favicon-upload-area');
+      if (area) {
+        area.classList.add('has-favicon');
+        document.getElementById('favicon-preview-img').src = parsed.logos.FAVICON;
+      }
+      updatePageFavicon(parsed.logos.FAVICON);
     }
     updateLogoInMock();
   }
@@ -2103,6 +2728,7 @@ function init() {
     // Retry once Chart.js loads
     document.querySelector('script[src*="chart.js"]').addEventListener('load', initPieChart);
   }
+  updateLoginMock();
 }
 
 // Prevent color inputs from firing drag events on logo areas
