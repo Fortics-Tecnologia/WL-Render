@@ -1248,6 +1248,77 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.12);
   }
 
+  /* ===================== LEFT PANEL TABS ===================== */
+  .lpanel-tabs {
+    display: flex;
+    background: #e2e6f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    margin: 10px 16px 0;
+    flex-shrink: 0;
+  }
+  .lpanel-tab-btn {
+    flex: 1;
+    padding: 5px 4px;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  .lpanel-tab-btn.active {
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  .lpanel-tab-panel { display: none; }
+  .lpanel-tab-panel.active { display: block; }
+
+  /* ===================== TOAST ===================== */
+  .toast {
+    position: fixed;
+    bottom: 52px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    opacity: 0;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #16a34a; }
+  .toast.error   { background: #dc2626; }
+
+  /* ===================== SAVE BUTTON ===================== */
+  .btn-save {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-save:hover { background: #15803d; }
+  .btn-save:disabled { background: #86efac; cursor: not-allowed; }
+
   /* ===================== FAVICON UPLOAD ===================== */
   .favicon-upload-area {
     border: 1.5px dashed #d1d5db;
@@ -1447,6 +1518,100 @@
   }
   .mock-login-banner-placeholder-icon { font-size: 48px; opacity: 0.4; }
   .mock-login-banner-placeholder-text { font-size: 13px; font-weight: 500; opacity: 0.5; }
+
+  /* Tab overflow for 4-tab layout */
+  .lpanel-tab-btn { overflow: hidden; text-overflow: ellipsis; }
+
+  /* ===================== SETTINGS TAB ===================== */
+  .config-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 14px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .config-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e6f0;
+  }
+
+  /* Provider selector */
+  .provider-selector {
+    display: flex;
+    background: #e2e6f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+  .provider-btn {
+    flex: 1;
+    padding: 6px 4px;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+    color: #64748b;
+  }
+  .provider-btn.active {
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  .provider-section { display: none; }
+  .provider-section.active { display: block; }
+
+  /* Password field with toggle */
+  .password-field-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .password-field-wrap .field-input {
+    padding-right: 34px;
+  }
+  .password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+    transition: color .15s;
+  }
+  .password-toggle-btn:hover { color: #475569; }
+
+  /* SMTP notice / help link */
+  .smtp-notice {
+    font-size: 10px;
+    color: #64748b;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    padding: 7px 10px;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .smtp-notice a {
+    color: #0ea5e9;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .smtp-notice a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1458,6 +1623,7 @@
   </div>
   <span class="app-topbar-title">THEME LAB</span>
   <div class="app-topbar-right">
+    <button class="btn-save" id="btn-save-storage" onclick="submitToStorage()">💾 Salvar no Storage</button>
     <button class="btn-export" onclick="openExportModal()">Exportar JSON</button>
     <button class="btn-import" onclick="openImportModal()">Importar JSON</button>
   </div>
@@ -1467,141 +1633,281 @@
 
   <!-- LEFT PANEL -->
   <div class="left-panel">
+
+    <!-- Tab navigation -->
+    <div class="lpanel-tabs">
+      <button class="lpanel-tab-btn active" id="ltab-btn-geral"   onclick="switchLTab('geral')">Dados Gerais</button>
+      <button class="lpanel-tab-btn"        id="ltab-btn-imagens" onclick="switchLTab('imagens')">Imagens</button>
+      <button class="lpanel-tab-btn"        id="ltab-btn-cores"   onclick="switchLTab('cores')">Cores</button>
+      <button class="lpanel-tab-btn"        id="ltab-btn-config"  onclick="switchLTab('config')">Configurações</button>
+    </div>
+
     <div class="left-panel-scroll">
 
-      <!-- IDENTIDADE -->
-      <div class="panel-section">
-        <div class="section-title">Identidade</div>
-        <div class="field-row">
-          <label class="field-label">Nome do Produto</label>
-          <input class="field-input" id="inp-product-name" type="text" value="Fortics IA" oninput="updateProductName(this.value)">
+      <!-- ═══════════════════ TAB: DADOS GERAIS ═══════════════════ -->
+      <div class="lpanel-tab-panel active" id="ltab-geral">
+        <div class="panel-section">
+          <div class="section-title">Produto</div>
+          <div class="field-row">
+            <label class="field-label">Nome do Produto</label>
+            <input class="field-input" id="inp-product-name" type="text" value="Fortics IA" oninput="updateProductName(this.value)">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Nome da Empresa</label>
+            <input class="field-input" id="inp-company-name" type="text" placeholder="Fortics Tecnologia">
+          </div>
+          <div class="field-row">
+            <label class="field-label">CNPJ da Empresa</label>
+            <input class="field-input" id="inp-company-cnpj" type="text" placeholder="00.000.000/0000-00">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Cidade/UF</label>
+            <input class="field-input" id="inp-company-city-uf" type="text" placeholder="São Paulo / SP">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Conteúdo do Rodapé</label>
+            <input class="field-input" id="inp-footer-content" type="text" placeholder="© 2026 Empresa — Todos os direitos reservados">
+          </div>
         </div>
-        <div class="field-row">
-          <label class="field-label">Favicon</label>
-          <div id="favicon-upload-area" class="favicon-upload-area" onclick="triggerFaviconUpload()" ondrop="handleFaviconDrop(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-            <div class="favicon-upload-placeholder">
-              <span style="font-size:18px;opacity:.4">🔖</span>
-              <div>
-                <div style="font-size:10px;font-weight:600;color:#64748b">Favicon</div>
-                <div style="font-size:9px;color:#94a3b8">SVG, PNG, ICO</div>
+        <div class="panel-section">
+          <div class="section-title">URLs</div>
+          <div class="field-row">
+            <label class="field-label">Website</label>
+            <input class="field-input" id="inp-website-url" type="url" placeholder="https://empresa.com.br">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Termos de Uso</label>
+            <input class="field-input" id="inp-terms-of-use" type="url" placeholder="https://empresa.com.br/termos">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Política de Privacidade</label>
+            <input class="field-input" id="inp-privacy-policy-url" type="url" placeholder="https://empresa.com.br/privacidade">
+          </div>
+          <div class="field-row">
+            <label class="field-label">URL Pública do App</label>
+            <input class="field-input" id="inp-app-public-url" type="url" placeholder="https://app.empresa.com.br">
+          </div>
+        </div>
+      </div><!-- end ltab-geral -->
+
+      <!-- ═══════════════════ TAB: IMAGENS ═══════════════════ -->
+      <div class="lpanel-tab-panel" id="ltab-imagens">
+
+        <!-- Favicon -->
+        <div class="panel-section">
+          <div class="section-title">Favicon</div>
+          <div class="field-row">
+            <div id="favicon-upload-area" class="favicon-upload-area" onclick="triggerFaviconUpload()" ondrop="handleFaviconDrop(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="favicon-upload-placeholder">
+                <span style="font-size:18px;opacity:.4">🔖</span>
+                <div>
+                  <div style="font-size:10px;font-weight:600;color:#64748b">Favicon</div>
+                  <div style="font-size:9px;color:#94a3b8">SVG, PNG, ICO</div>
+                </div>
+              </div>
+              <div class="favicon-upload-preview">
+                <img class="favicon-preview-img" id="favicon-preview-img" src="" alt="">
+                <div style="flex:1">
+                  <div style="font-size:10px;font-weight:600;color:#334155" id="favicon-preview-name">favicon</div>
+                  <div style="font-size:9px;color:#94a3b8">Clique para trocar</div>
+                </div>
+                <button class="logo-remove" onclick="removeFavicon(event)">×</button>
               </div>
             </div>
-            <div class="favicon-upload-preview">
-              <img class="favicon-preview-img" id="favicon-preview-img" src="" alt="">
-              <div style="flex:1">
-                <div style="font-size:10px;font-weight:600;color:#334155" id="favicon-preview-name">favicon</div>
-                <div style="font-size:9px;color:#94a3b8">Clique para trocar</div>
+            <input type="file" id="favicon-file-input" accept=".svg,.png,.ico,image/svg+xml,image/png,image/x-icon" style="display:none" onchange="handleFaviconFile(this)">
+          </div>
+        </div>
+
+        <!-- Logos -->
+        <div class="panel-section">
+          <div class="section-title">Logos</div>
+          <div class="logo-grid">
+            <div id="logo-lm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-lg','lm-lg')" ondrop="handleLogoDrop(event,'logo-lm-lg','lm-lg')" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="logo-placeholder">
+                <span style="font-size:20px;opacity:.4">🖼</span>
+                <div class="logo-upload-label">Logo Light (grande)</div>
+                <div class="logo-upload-label">196x44px</div>
+                <div class="logo-upload-hint">Clique ou arraste SVG/PNG</div>
               </div>
-              <button class="logo-remove" onclick="removeFavicon(event)">×</button>
+              <div class="logo-preview">
+                <img id="logo-lm-lg-thumb" src="" alt="logo">
+                <button class="logo-remove" onclick="removeLogo(event,'logo-lm-lg','lm-lg')">×</button>
+              </div>
+            </div>
+            <div id="logo-dm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-lg','dm-lg')" ondrop="handleLogoDrop(event,'logo-dm-lg','dm-lg')" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="logo-placeholder">
+                <span style="font-size:20px;opacity:.4">🖼</span>
+                <div class="logo-upload-label">Logo Dark (grande)</div>
+                <div class="logo-upload-label">196x44px</div>
+                <div class="logo-upload-hint">Clique ou arraste SVG/PNG</div>
+              </div>
+              <div class="logo-preview">
+                <img id="logo-dm-lg-thumb" src="" alt="logo">
+                <button class="logo-remove" onclick="removeLogo(event,'logo-dm-lg','dm-lg')">×</button>
+              </div>
+            </div>
+            <div id="logo-lm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-sm','lm-sm')" ondrop="handleLogoDrop(event,'logo-lm-sm','lm-sm')" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="logo-placeholder">
+                <span style="font-size:20px;opacity:.4">🖼</span>
+                <div class="logo-upload-label">Logo Light (pequena)</div>
+                <div class="logo-upload-label">58x58px</div>
+                <div class="logo-upload-hint">Clique ou arraste SVG/PNG</div>
+              </div>
+              <div class="logo-preview">
+                <img id="logo-lm-sm-thumb" src="" alt="logo">
+                <button class="logo-remove" onclick="removeLogo(event,'logo-lm-sm','lm-sm')">×</button>
+              </div>
+            </div>
+            <div id="logo-dm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-sm','dm-sm')" ondrop="handleLogoDrop(event,'logo-dm-sm','dm-sm')" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="logo-placeholder">
+                <span style="font-size:20px;opacity:.4">🖼</span>
+                <div class="logo-upload-label">Logo Dark (pequena)</div>
+                <div class="logo-upload-label">58x58px</div>
+                <div class="logo-upload-hint">Clique ou arraste SVG/PNG</div>
+              </div>
+              <div class="logo-preview">
+                <img id="logo-dm-sm-thumb" src="" alt="logo">
+                <button class="logo-remove" onclick="removeLogo(event,'logo-dm-sm','dm-sm')">×</button>
+              </div>
             </div>
           </div>
-          <input type="file" id="favicon-file-input" accept=".svg,.png,.ico,image/svg+xml,image/png,image/x-icon" style="display:none" onchange="handleFaviconFile(this)">
+          <input type="file" id="logo-file-input" accept=".svg,.png,image/svg+xml,image/png" style="display:none" onchange="handleLogoFile(this)">
         </div>
-      </div>
 
-      <!-- LOGOS -->
-      <div class="panel-section">
-        <div class="section-title">Logos</div>
-        <div class="logo-grid">
-          <div id="logo-lm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-lg','lm-lg')" ondrop="handleLogoDrop(event,'logo-lm-lg','lm-lg')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-            <div class="logo-placeholder">
-              <span style="font-size:20px;opacity:.4">🖼</span>
-              <div class="logo-upload-label">Logo Light (grande)</div>
-              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
+        <!-- Banner Login -->
+        <div class="panel-section">
+          <div class="section-title">Login — Banner</div>
+          <div class="field-row">
+            <div id="banner-upload-area" class="logo-upload-area" style="min-height:90px;" onclick="triggerBannerUpload()" ondrop="handleBannerDrop(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
+              <div class="logo-placeholder">
+                <span style="font-size:24px;opacity:.4">🖼</span>
+                <div class="logo-upload-label">Imagem de fundo do painel direito</div>
+                <div class="logo-upload-hint">JPG, PNG, WebP ou SVG</div>
+              </div>
+              <div class="logo-preview">
+                <img id="banner-upload-thumb" src="" alt="banner" style="width:80px;height:44px;object-fit:cover;border-radius:4px;">
+                <button class="logo-remove" onclick="removeBanner(event)">×</button>
+              </div>
             </div>
-            <div class="logo-preview">
-              <img id="logo-lm-lg-thumb" src="" alt="logo">
-              <button class="logo-remove" onclick="removeLogo(event,'logo-lm-lg','lm-lg')">×</button>
-            </div>
-          </div>
-          <div id="logo-dm-lg" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-lg','dm-lg')" ondrop="handleLogoDrop(event,'logo-dm-lg','dm-lg')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-            <div class="logo-placeholder">
-              <span style="font-size:20px;opacity:.4">🖼</span>
-              <div class="logo-upload-label">Logo Dark (grande)</div>
-              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
-            </div>
-            <div class="logo-preview">
-              <img id="logo-dm-lg-thumb" src="" alt="logo">
-              <button class="logo-remove" onclick="removeLogo(event,'logo-dm-lg','dm-lg')">×</button>
-            </div>
-          </div>
-          <div id="logo-lm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-lm-sm','lm-sm')" ondrop="handleLogoDrop(event,'logo-lm-sm','lm-sm')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-            <div class="logo-placeholder">
-              <span style="font-size:20px;opacity:.4">🖼</span>
-              <div class="logo-upload-label">Logo Light (pequena)</div>
-              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
-            </div>
-            <div class="logo-preview">
-              <img id="logo-lm-sm-thumb" src="" alt="logo">
-              <button class="logo-remove" onclick="removeLogo(event,'logo-lm-sm','lm-sm')">×</button>
-            </div>
-          </div>
-          <div id="logo-dm-sm" class="logo-upload-area" onclick="triggerLogoUpload('logo-dm-sm','dm-sm')" ondrop="handleLogoDrop(event,'logo-dm-sm','dm-sm')" ondragover="e=>e.preventDefault()" ondragenter="this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-            <div class="logo-placeholder">
-              <span style="font-size:20px;opacity:.4">🖼</span>
-              <div class="logo-upload-label">Logo Dark (pequena)</div>
-              <div class="logo-upload-hint">Clique ou arraste um SVG/PNG</div>
-            </div>
-            <div class="logo-preview">
-              <img id="logo-dm-sm-thumb" src="" alt="logo">
-              <button class="logo-remove" onclick="removeLogo(event,'logo-dm-sm','dm-sm')">×</button>
-            </div>
+            <input type="file" id="banner-file-input" accept=".jpg,.jpeg,.png,.webp,.svg,image/*" style="display:none" onchange="handleBannerFile(this)">
           </div>
         </div>
-        <input type="file" id="logo-file-input" accept=".svg,.png,image/svg+xml,image/png" style="display:none" onchange="handleLogoFile(this)">
-      </div>
 
-      <!-- LOGIN PAGE BANNER -->
-      <div class="panel-section">
-        <div class="section-title">Login — Banner</div>
-        <div class="field-row">
-          <label class="field-label">URL da imagem de fundo (painel direito)</label>
-          <input class="field-input" id="inp-banner-url" type="url" placeholder="https://exemplo.com/imagem.jpg" oninput="updateBannerUrl(this.value)">
+      </div><!-- end ltab-imagens -->
+
+      <!-- ═══════════════════ TAB: CORES ═══════════════════ -->
+      <div class="lpanel-tab-panel" id="ltab-cores">
+
+        <!-- TEMA -->
+        <div class="panel-section">
+          <div class="section-title">Tema</div>
+          <div class="theme-toggle">
+            <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ Light Mode</button>
+            <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 Dark Mode</button>
+          </div>
         </div>
-      </div>
 
-      <!-- TEMA -->
-      <div class="panel-section">
-        <div class="section-title">Tema</div>
-        <div class="theme-toggle">
-          <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ Light Mode</button>
-          <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 Dark Mode</button>
+        <!-- CORES LM -->
+        <div class="panel-section">
+          <div class="collapsible-header open" onclick="toggleCollapse(this)">
+            <span class="collapsible-title">🌤 Cores — Light Mode</span>
+            <span class="collapsible-arrow">▼</span>
+          </div>
+          <div class="collapsible-body open" id="lm-colors-body">
+            <div class="subsection-title">Cores Principais</div>
+            <div id="lm-main-colors"></div>
+            <div class="subsection-title">Backgrounds e Texto</div>
+            <div id="lm-bg-colors"></div>
+          </div>
         </div>
-      </div>
 
-      <!-- CORES LM -->
-      <div class="panel-section">
-        <div class="collapsible-header open" onclick="toggleCollapse(this)">
-          <span class="collapsible-title">🌤 Cores — Light Mode</span>
-          <span class="collapsible-arrow">▼</span>
+        <!-- CORES DM -->
+        <div class="panel-section">
+          <div class="collapsible-header" onclick="toggleCollapse(this)">
+            <span class="collapsible-title">🌙 Cores — Dark Mode</span>
+            <span class="collapsible-arrow">▼</span>
+          </div>
+          <div class="collapsible-body" id="dm-colors-body">
+            <div class="subsection-title">Cores Principais</div>
+            <div id="dm-main-colors"></div>
+            <div class="subsection-title">Backgrounds e Texto</div>
+            <div id="dm-bg-colors"></div>
+          </div>
         </div>
-        <div class="collapsible-body open" id="lm-colors-body">
 
-          <div class="subsection-title">Cores Principais</div>
-          <div id="lm-main-colors"></div>
+      </div><!-- end ltab-cores -->
 
-          <div class="subsection-title">Backgrounds e Texto</div>
-          <div id="lm-bg-colors"></div>
+      <!-- ═══════════════════ TAB: CONFIGURAÇÕES ═══════════════════ -->
+      <div class="lpanel-tab-panel" id="ltab-config">
+        <div class="panel-section">
+
+          <!-- ── Provedor de E-mail ── -->
+          <div class="config-section-title">Provedor de E-mail</div>
+          <div class="provider-selector">
+            <button class="provider-btn active" id="provider-btn-smtp"     onclick="switchProvider('smtp')">SMTP</button>
+            <button class="provider-btn"        id="provider-btn-sendgrid" onclick="switchProvider('sendgrid')">SendGrid</button>
+          </div>
+
+          <!-- ── SMTP ── -->
+          <div class="provider-section active" id="provider-smtp">
+            <div class="field-row">
+              <label class="field-label">SMTP_EMAIL</label>
+              <input class="field-input" id="inp-smtp-email" type="text" placeholder="seuemail@gmail.com">
+            </div>
+            <div class="field-row">
+              <label class="field-label">SMTP_PASSWORD</label>
+              <div class="password-field-wrap">
+                <input class="field-input" id="inp-smtp-password" type="password" placeholder="••••••••••••••••">
+                <button class="password-toggle-btn" type="button" onclick="togglePassword('inp-smtp-password', this)" title="Mostrar/ocultar senha">👁</button>
+              </div>
+              <div class="smtp-notice">
+                Para contas Gmail, use uma <strong>Senha de App</strong> em vez da sua senha normal.<br>
+                <a href="https://support.google.com/mail/answer/185833?hl=pt-br" target="_blank" rel="noopener noreferrer">→ Como gerar a Senha de App do Google</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SendGrid ── -->
+          <div class="provider-section" id="provider-sendgrid">
+            <div class="field-row">
+              <label class="field-label">SENDGRID_API_KEY</label>
+              <div class="password-field-wrap">
+                <input class="field-input" id="inp-sendgrid-api-key" type="password" placeholder="SG.xxxxxxxxxxxx">
+                <button class="password-toggle-btn" type="button" onclick="togglePassword('inp-sendgrid-api-key', this)" title="Mostrar/ocultar">👁</button>
+              </div>
+            </div>
+            <div class="field-row">
+              <label class="field-label">SENDGRID_FROM_EMAIL</label>
+              <input class="field-input" id="inp-sendgrid-from-email" type="text" placeholder="noreply@empresa.com">
+            </div>
+
+            <!-- ── Templates de E-mail ── -->
+            <div class="config-section-title">Templates de E-mail</div>
+
+            <div class="field-row">
+              <label class="field-label">TEMPLATE_TEMPORARY_PASSWORD</label>
+              <input class="field-input" id="inp-tpl-temporary-password" type="text" placeholder="ID do template no SendGrid">
+            </div>
+            <div class="field-row">
+              <label class="field-label">TEMPLATE_OTP</label>
+              <input class="field-input" id="inp-tpl-otp" type="text" placeholder="ID do template no SendGrid">
+            </div>
+            <div class="field-row">
+              <label class="field-label">TEMPLATE_WELCOME</label>
+              <input class="field-input" id="inp-tpl-welcome" type="text" placeholder="ID do template no SendGrid">
+            </div>
+            <div class="field-row">
+              <label class="field-label">TEMPLATE_PASSWORD_RESET</label>
+              <input class="field-input" id="inp-tpl-password-reset" type="text" placeholder="ID do template no SendGrid">
+            </div>
+            <div class="field-row">
+              <label class="field-label">TEMPLATE_FIRST_ACCESS</label>
+              <input class="field-input" id="inp-tpl-first-access" type="text" placeholder="ID do template no SendGrid">
+            </div>
+          </div>
 
         </div>
-      </div>
-
-      <!-- CORES DM -->
-      <div class="panel-section">
-        <div class="collapsible-header" onclick="toggleCollapse(this)">
-          <span class="collapsible-title">🌙 Cores — Dark Mode</span>
-          <span class="collapsible-arrow">▼</span>
-        </div>
-        <div class="collapsible-body" id="dm-colors-body">
-
-          <div class="subsection-title">Cores Principais</div>
-          <div id="dm-main-colors"></div>
-
-          <div class="subsection-title">Backgrounds e Texto</div>
-          <div id="dm-bg-colors"></div>
-
-        </div>
-      </div>
+      </div><!-- end ltab-config -->
 
     </div><!-- end scroll -->
 
@@ -1862,6 +2168,9 @@
   </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="app-toast"></div>
+
 <!-- EXPORT MODAL -->
 <div class="modal-overlay" id="export-modal">
   <div class="modal-box">
@@ -1901,8 +2210,7 @@
 let currentTheme = 'light';
 let currentView = 'dashboard';
 let currentLogoTarget = null;
-let bannerUrl = '';
-const logos = { 'lm-lg': null, 'dm-lg': null, 'lm-sm': null, 'dm-sm': null, 'favicon': null };
+const logos = { 'lm-lg': null, 'dm-lg': null, 'lm-sm': null, 'dm-sm': null, 'favicon': null, 'banner': null };
 
 const DEFAULTS = {
   lm: {
@@ -2242,17 +2550,11 @@ function handleLogoFile(input) {
   if (!input.files || !input.files[0] || !currentLogoTarget) return;
   const { areaId, logoKey } = currentLogoTarget;
   const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    const b64 = e.target.result;
-    logos[logoKey] = b64;
-    const area = document.getElementById(areaId);
-    area.classList.add('has-logo');
-    const thumb = document.getElementById(areaId + '-thumb');
-    thumb.src = b64;
-    updateLogoInMock();
-  };
-  reader.readAsDataURL(file);
+  logos[logoKey] = file;
+  const area = document.getElementById(areaId);
+  area.classList.add('has-logo');
+  document.getElementById(areaId + '-thumb').src = URL.createObjectURL(file);
+  updateLogoInMock();
 }
 
 function handleLogoDrop(e, areaId, logoKey) {
@@ -2261,15 +2563,10 @@ function handleLogoDrop(e, areaId, logoKey) {
   area.classList.remove('dragover');
   const file = e.dataTransfer.files[0];
   if (!file) return;
-  currentLogoTarget = { areaId, logoKey };
-  const reader = new FileReader();
-  reader.onload = ev => {
-    logos[logoKey] = ev.target.result;
-    area.classList.add('has-logo');
-    document.getElementById(areaId + '-thumb').src = ev.target.result;
-    updateLogoInMock();
-  };
-  reader.readAsDataURL(file);
+  logos[logoKey] = file;
+  area.classList.add('has-logo');
+  document.getElementById(areaId + '-thumb').src = URL.createObjectURL(file);
+  updateLogoInMock();
 }
 
 function removeLogo(e, areaId, logoKey) {
@@ -2292,16 +2589,13 @@ function triggerFaviconUpload() {
 function handleFaviconFile(input) {
   if (!input.files || !input.files[0]) return;
   const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    logos['favicon'] = e.target.result;
-    const area = document.getElementById('favicon-upload-area');
-    area.classList.add('has-favicon');
-    document.getElementById('favicon-preview-img').src = e.target.result;
-    document.getElementById('favicon-preview-name').textContent = file.name;
-    updatePageFavicon(e.target.result);
-  };
-  reader.readAsDataURL(file);
+  logos['favicon'] = file;
+  const objUrl = URL.createObjectURL(file);
+  const area = document.getElementById('favicon-upload-area');
+  area.classList.add('has-favicon');
+  document.getElementById('favicon-preview-img').src = objUrl;
+  document.getElementById('favicon-preview-name').textContent = file.name;
+  updatePageFavicon(objUrl);
 }
 
 function handleFaviconDrop(e) {
@@ -2310,15 +2604,51 @@ function handleFaviconDrop(e) {
   area.classList.remove('dragover');
   const file = e.dataTransfer.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    logos['favicon'] = ev.target.result;
-    area.classList.add('has-favicon');
-    document.getElementById('favicon-preview-img').src = ev.target.result;
-    document.getElementById('favicon-preview-name').textContent = file.name;
-    updatePageFavicon(ev.target.result);
-  };
-  reader.readAsDataURL(file);
+  logos['favicon'] = file;
+  const objUrl = URL.createObjectURL(file);
+  area.classList.add('has-favicon');
+  document.getElementById('favicon-preview-img').src = objUrl;
+  document.getElementById('favicon-preview-name').textContent = file.name;
+  updatePageFavicon(objUrl);
+}
+
+/* ============================================================
+   BANNER UPLOAD
+   ============================================================ */
+function triggerBannerUpload() {
+  document.getElementById('banner-file-input').value = '';
+  document.getElementById('banner-file-input').click();
+}
+
+function handleBannerFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  logos['banner'] = file;
+  const area = document.getElementById('banner-upload-area');
+  area.classList.add('has-logo');
+  document.getElementById('banner-upload-thumb').src = URL.createObjectURL(file);
+  updateLoginMock();
+}
+
+function handleBannerDrop(e) {
+  e.preventDefault();
+  const area = document.getElementById('banner-upload-area');
+  area.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  logos['banner'] = file;
+  area.classList.add('has-logo');
+  document.getElementById('banner-upload-thumb').src = URL.createObjectURL(file);
+  updateLoginMock();
+}
+
+function removeBanner(e) {
+  e.stopPropagation();
+  logos['banner'] = null;
+  const area = document.getElementById('banner-upload-area');
+  area.classList.remove('has-logo');
+  document.getElementById('banner-upload-thumb').src = '';
+  updateLoginMock();
 }
 
 function removeFavicon(e) {
@@ -2340,11 +2670,11 @@ function updatePageFavicon(dataUrl) {
 
 function updateLogoInMock() {
   const lgKey = currentTheme === 'light' ? 'lm-lg' : 'dm-lg';
-  const logo = logos[lgKey];
+  const logoFile = logos[lgKey];
   const img = document.getElementById('mock-logo-img');
   const fallback = document.getElementById('mock-logo-fallback');
-  if (logo) {
-    img.src = logo;
+  if (logoFile) {
+    img.src = URL.createObjectURL(logoFile);
     img.style.display = 'block';
     fallback.style.display = 'none';
   } else {
@@ -2383,13 +2713,13 @@ function updateLoginMock() {
   if (toggleBtn) toggleBtn.textContent = isDark ? '☀️' : '🌙';
 
   // Logo: use dashboard logos (lm-lg / dm-lg)
-  const logoData = logos[isDark ? 'dm-lg' : 'lm-lg'];
+  const logoFile = logos[isDark ? 'dm-lg' : 'lm-lg'];
 
   const img = document.getElementById('mock-login-logo-img');
   const fallback = document.getElementById('mock-login-logo-fallback');
   if (img && fallback) {
-    if (logoData) {
-      img.src = logoData;
+    if (logoFile) {
+      img.src = URL.createObjectURL(logoFile);
       img.style.display = 'block';
       fallback.style.display = 'none';
     } else {
@@ -2398,13 +2728,14 @@ function updateLoginMock() {
     }
   }
 
-  // Banner (URL pública)
+  // Banner (arquivo upado)
+  const bannerFile = logos['banner'];
   const bannerImg = document.getElementById('mock-login-banner-img');
   const bannerOverlay = document.getElementById('mock-login-banner-overlay');
   const bannerPlaceholder = document.getElementById('mock-login-banner-placeholder');
   if (bannerImg && bannerPlaceholder) {
-    if (bannerUrl) {
-      bannerImg.src = bannerUrl;
+    if (bannerFile) {
+      bannerImg.src = URL.createObjectURL(bannerFile);
       bannerImg.style.display = 'block';
       bannerOverlay.style.display = 'block';
       bannerPlaceholder.style.display = 'none';
@@ -2461,37 +2792,39 @@ function resetDefaults() {
   buildColorRows('dm-main-colors', DEFAULTS.dm, false, 'dm-');
   buildColorRows('dm-bg-colors', DEFAULTS.dm_bg, false, 'dm-');
 
-  // Reset identity
+  // Reset identity / Dados Gerais
   document.getElementById('inp-product-name').value = 'Fortics IA';
   updateProductName('Fortics IA');
+  ['inp-company-name','inp-company-cnpj','inp-company-city-uf','inp-footer-content',
+   'inp-website-url','inp-terms-of-use','inp-privacy-policy-url','inp-app-public-url',
+   'inp-smtp-email','inp-smtp-password','inp-sendgrid-api-key','inp-sendgrid-from-email',
+   'inp-tpl-temporary-password','inp-tpl-otp','inp-tpl-welcome','inp-tpl-password-reset','inp-tpl-first-access']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  switchProvider('smtp');
 
-  // Reset logos
+  // Reset logos + banner
   for (const k of Object.keys(logos)) logos[k] = null;
   ['logo-lm-lg','logo-dm-lg','logo-lm-sm','logo-dm-sm'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.classList.remove('has-logo'); document.getElementById(id + '-thumb').src = ''; }
   });
-  // Reset banner URL
-  bannerUrl = '';
-  const bannerInp = document.getElementById('inp-banner-url');
-  if (bannerInp) bannerInp.value = '';
+  const bannerArea = document.getElementById('banner-upload-area');
+  if (bannerArea) { bannerArea.classList.remove('has-logo'); document.getElementById('banner-upload-thumb').src = ''; }
+
   // Reset favicon
   const faviconArea = document.getElementById('favicon-upload-area');
   if (faviconArea) faviconArea.classList.remove('has-favicon');
   const faviconImg = document.getElementById('favicon-preview-img');
   if (faviconImg) faviconImg.src = '';
-  updateLogoInMock();
 
-  // Apply current theme
+  updateLogoInMock();
   applyAllCurrentTheme();
 }
 
 /* ============================================================
    EXPORT JSON
    ============================================================ */
-function buildExportJSON() {
-  const pn = document.getElementById('inp-product-name').value;
-
+function buildColorPayload() {
   const lmColors = {};
   for (const [cssvar, def] of Object.entries(DEFAULTS.lm)) {
     const hexKey = 'lm-' + cssvar;
@@ -2519,19 +2852,49 @@ function buildExportJSON() {
     dmColors[def.var] = (liveValues[oklchKey] && CSS.supports('color', liveValues[oklchKey]))
       ? liveValues[oklchKey] : (liveValues[hexKey] || def.val);
   }
+  return { lmColors, dmColors };
+}
 
-  return JSON.stringify({
-    product_name: pn,
-    logos: {
-      LM_LOGO_LG: logos['lm-lg'],
-      DM_LOGO_LG: logos['dm-lg'],
-      LM_LOGO_SM: logos['lm-sm'],
-      DM_LOGO_SM: logos['dm-sm'],
-      BANNER_IMG_URL: bannerUrl || null,
-      FAVICON: logos['favicon'],
-    },
+function buildMetaObject() {
+  const { lmColors, dmColors } = buildColorPayload();
+  return {
+    product_name:              document.getElementById('inp-product-name').value,
+    company_name:              document.getElementById('inp-company-name').value,
+    company_cnpj:              document.getElementById('inp-company-cnpj').value,
+    company_city_uf:           document.getElementById('inp-company-city-uf').value,
+    footer_content:            document.getElementById('inp-footer-content').value,
+    website_url:               document.getElementById('inp-website-url').value,
+    terms_of_use:              document.getElementById('inp-terms-of-use').value,
+    privacy_policy_url:        document.getElementById('inp-privacy-policy-url').value,
+    app_public_url:            document.getElementById('inp-app-public-url').value,
+    email_provider:            currentProvider,
+    smtp_email:                document.getElementById('inp-smtp-email').value,
+    smtp_password:             document.getElementById('inp-smtp-password').value,
+    sendgrid_api_key:          document.getElementById('inp-sendgrid-api-key').value,
+    sendgrid_from_email:       document.getElementById('inp-sendgrid-from-email').value,
+    tpl_temporary_password:    document.getElementById('inp-tpl-temporary-password').value,
+    tpl_otp:                   document.getElementById('inp-tpl-otp').value,
+    tpl_welcome:               document.getElementById('inp-tpl-welcome').value,
+    tpl_password_reset:        document.getElementById('inp-tpl-password-reset').value,
+    tpl_first_access:          document.getElementById('inp-tpl-first-access').value,
     light_mode: lmColors,
-    dark_mode: dmColors,
+    dark_mode:  dmColors,
+  };
+}
+
+function buildExportJSON() {
+  const meta = buildMetaObject();
+  const getRef = (file) => file ? file.name : null;
+  return JSON.stringify({
+    ...meta,
+    logos: {
+      LM_LOGO_LG: getRef(logos['lm-lg']),
+      DM_LOGO_LG: getRef(logos['dm-lg']),
+      LM_LOGO_SM: getRef(logos['lm-sm']),
+      DM_LOGO_SM: getRef(logos['dm-sm']),
+      FAVICON:    getRef(logos['favicon']),
+      BANNER:     getRef(logos['banner']),
+    },
   }, null, 2);
 }
 
@@ -2583,43 +2946,21 @@ function applyImportJSON() {
 
   if (parsed.product_name) { document.getElementById('inp-product-name').value = parsed.product_name; updateProductName(parsed.product_name); }
 
-  // Logos
-  if (parsed.logos) {
-    const mapping = {
-      LM_LOGO_LG: 'lm-lg', DM_LOGO_LG: 'dm-lg',
-      LM_LOGO_SM: 'lm-sm', DM_LOGO_SM: 'dm-sm'
-    };
-    const areaId = {
-      'lm-lg': 'logo-lm-lg', 'dm-lg': 'logo-dm-lg',
-      'lm-sm': 'logo-lm-sm', 'dm-sm': 'logo-dm-sm'
-    };
-    for (const [jsonKey, logoKey] of Object.entries(mapping)) {
-      if (parsed.logos[jsonKey]) {
-        logos[logoKey] = parsed.logos[jsonKey];
-        const el = document.getElementById(areaId[logoKey]);
-        if (el) {
-          el.classList.add('has-logo');
-          document.getElementById(areaId[logoKey] + '-thumb').src = parsed.logos[jsonKey];
-        }
-      }
+  // Dados Gerais text fields
+  const textFields = ['company_name','company_cnpj','company_city_uf','footer_content',
+    'website_url','terms_of_use','privacy_policy_url','app_public_url',
+    'smtp_email','smtp_password','sendgrid_api_key','sendgrid_from_email',
+    'tpl_temporary_password','tpl_otp','tpl_welcome','tpl_password_reset','tpl_first_access'];
+  if (parsed.email_provider) switchProvider(parsed.email_provider);
+  for (const f of textFields) {
+    if (parsed[f] !== undefined) {
+      const el = document.getElementById('inp-' + f.replace(/_/g, '-'));
+      if (el) el.value = parsed[f];
     }
-    if (parsed.logos.BANNER_IMG_URL) {
-      bannerUrl = parsed.logos.BANNER_IMG_URL;
-      const inp = document.getElementById('inp-banner-url');
-      if (inp) inp.value = bannerUrl;
-      updateLoginMock();
-    }
-    if (parsed.logos.FAVICON) {
-      logos['favicon'] = parsed.logos.FAVICON;
-      const area = document.getElementById('favicon-upload-area');
-      if (area) {
-        area.classList.add('has-favicon');
-        document.getElementById('favicon-preview-img').src = parsed.logos.FAVICON;
-      }
-      updatePageFavicon(parsed.logos.FAVICON);
-    }
-    updateLogoInMock();
   }
+
+  // Logos: JSON now contains filenames only (no base64); skip file restoration
+  // (user must re-upload files — File objects cannot be reconstructed from JSON)
 
   // LM colors
   if (parsed.light_mode) {
@@ -2748,6 +3089,97 @@ function setZoomValue(val) {
 }
 function setZoom(delta) { setZoomValue(currentZoom + delta); }
 function setZoomFromSlider(val) { setZoomValue(parseFloat(val)); }
+
+/* ============================================================
+   LEFT PANEL TABS
+   ============================================================ */
+function switchLTab(tab) {
+  ['geral', 'imagens', 'cores', 'config'].forEach(t => {
+    document.getElementById('ltab-btn-' + t).classList.toggle('active', t === tab);
+    document.getElementById('ltab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+/* ============================================================
+   PROVIDER SELECTOR
+   ============================================================ */
+let currentProvider = 'smtp';
+function switchProvider(p) {
+  currentProvider = p;
+  ['smtp', 'sendgrid'].forEach(id => {
+    document.getElementById('provider-btn-' + id).classList.toggle('active', id === p);
+    document.getElementById('provider-' + id).classList.toggle('active', id === p);
+  });
+}
+
+/* ============================================================
+   PASSWORD VISIBILITY TOGGLE
+   ============================================================ */
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.textContent = isHidden ? '🙈' : '👁';
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let _toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('app-toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  // Force reflow so transition replays
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+/* ============================================================
+   SUBMIT TO STORAGE
+   ============================================================ */
+async function submitToStorage() {
+  const btn = document.getElementById('btn-save-storage');
+  const productName = document.getElementById('inp-product-name').value.trim();
+  if (!productName) {
+    showToast('Preencha o Nome do Produto antes de salvar.', 'error');
+    switchLTab('geral');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Salvando…';
+
+  const meta = buildMetaObject();
+  const fd = new FormData();
+  fd.append('meta', JSON.stringify(meta));
+
+  const fileFields = {
+    logo_lm_lg: logos['lm-lg'],
+    logo_dm_lg: logos['dm-lg'],
+    logo_lm_sm: logos['lm-sm'],
+    logo_dm_sm: logos['dm-sm'],
+    favicon:    logos['favicon'],
+    banner:     logos['banner'],
+  };
+  for (const [fieldName, file] of Object.entries(fileFields)) {
+    if (file) fd.append(fieldName, file, file.name);
+  }
+
+  try {
+    const res  = await fetch('/api/submit', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    showToast(`✓ Salvo em ${data.path}`, 'success');
+  } catch (err) {
+    showToast(`Erro ao salvar: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Salvar no Storage';
+  }
+}
 </script>
 </body>
 </html>
